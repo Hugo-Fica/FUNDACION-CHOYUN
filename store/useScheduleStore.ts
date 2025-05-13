@@ -7,9 +7,13 @@ export const useScheduleStore = create<ScheduleStore>()(
     persist(
       (set) => {
         return {
-          schedules: [],
+          schedules: null,
           setSchedules: (schedules) => {
             set({ schedules }, false, 'SET_SCHEDULES')
+          },
+          classes: null,
+          setClasses: (classes) => {
+            set({ classes }, false, 'SET_CLASSES')
           }
         }
       },

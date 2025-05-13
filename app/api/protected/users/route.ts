@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
 
 export async function PUT(req: NextRequest) {
   try {
-    const { id, email, names, lastnames, phone, role, age } = await req.json()
+    const { id, email, names, lastnames, phone, role, age, birthday } = await req.json()
     if (!id) {
       return NextResponse.json(
         { message: 'Error no se proporciono el id del usuario' },
@@ -87,7 +87,7 @@ export async function PUT(req: NextRequest) {
 
     const editarUsuario = await prisma?.users.update({
       where: { id },
-      data: { email, names, lastnames, phone, role_id: role, age }
+      data: { email, names, lastnames, phone, role_id: role, age, birthday }
     })
 
     if (!editarUsuario) return NextResponse.json({ message: 'No se pudo actualizar el usuario' })

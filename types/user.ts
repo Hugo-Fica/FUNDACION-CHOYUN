@@ -64,6 +64,6 @@ export type NewUser = {
 }
 
 export type UserStore = {
-  users: User[]
+  users: User[] | null
   setUsers: (users: User[]) => void
 }

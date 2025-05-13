@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     const { teacherId } = body
 
     if (!teacherId) {
-      return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
+      return NextResponse.json({ error: 'No hay profesor seleccionado' }, { status: 400 })
     }
 
     // Verificar que la clase existe
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     })
 
     if (!classExists) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Clase no encontrada' }, { status: 404 })
     }
 
     // Verificar que el usuario existe y tiene rol de profesor
@@ -72,12 +72,15 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     })
 
     if (!teacher) {
-      return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Profesor no encontrado' }, { status: 404 })
     }
 
     // Verificar que el usuario tiene rol de profesor
-    if (teacher.role.name !== 'teacher') {
-      return NextResponse.json({ error: 'User does not have teacher role' }, { status: 403 })
+    if (teacher.role.name !== 'user') {
+      return NextResponse.json(
+        { error: 'El usuario no tiene el rol de administrador' },
+        { status: 403 }
+      )
     }
 
     // Verificar si ya existe la relación
@@ -90,7 +93,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
 
     if (existingRelation) {
       return NextResponse.json(
-        { error: 'Teacher is already assigned to this class' },
+        { error: 'El profesor ya está asignado a esta clase' },
         { status: 400 }
       )
     }

@@ -3,9 +3,14 @@ import axios from 'axios'
 
 export const useRoles = () => {
   const getRoles = async () => {
-    const { data } = await axios.get('/api/protected/roles')
+    try {
+      const { data } = await axios.get('/api/protected/roles')
 
-    return data.roles as Role[]
+      return data.roles as Role[]
+    } catch (error) {
+      console.log(error)
+      return null
+    }
   }
   return { getRoles }
 }

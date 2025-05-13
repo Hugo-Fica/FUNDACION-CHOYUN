@@ -13,29 +13,28 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     })
 
     if (!classExists) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Clase no encontrada' }, { status: 404 })
     }
 
     // Obtener los estudiantes de la clase
-    const students = await prisma.studentInClass.findMany({
+    const studentsClass = await prisma.studentInClass.findMany({
       where: {
         classId: id
       },
       include: {
         student: {
-          select: {
-            id: true,
-            email: true,
-            names: true,
-            lastnames: true,
-            phone: true,
-            role: true
-          }
+          select: { id: true, names: true, lastnames: true }
         }
       }
     })
-
-    return NextResponse.json(students)
+    const studentsFinal = studentsClass.map(
+      ({ createdAt, updatedAt, classId, studentId, ...item }) => {
+        return {
+          ...item
+        }
+      }
+    )
+    return NextResponse.json(studentsFinal)
   } catch (error) {
     console.error('Error fetching students:', error)
     return NextResponse.json(
@@ -53,7 +52,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     const { studentId } = body
 
     if (!studentId) {
-      return NextResponse.json({ error: 'Student ID is required' }, { status: 400 })
+      return NextResponse.json({ error: 'No hay alumno seleccionado' }, { status: 400 })
     }
 
     // Verificar que la clase existe
@@ -62,7 +61,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     })
 
     if (!classExists) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'La clase seleccionada no existe' }, { status: 404 })
     }
 
     // Verificar que el usuario existe
@@ -71,7 +70,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     })
 
     if (!student) {
-      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+      return NextResponse.json({ error: 'El alumno seleccionado no existe' }, { status: 404 })
     }
 
     // Verificar si ya existe la relación
@@ -83,10 +82,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     })
 
     if (existingRelation) {
-      return NextResponse.json(
-        { error: 'Student is already enrolled in this class' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'El alumno ya está inscrito en la clase' }, { status: 400 })
     }
 
     // Crear la relación

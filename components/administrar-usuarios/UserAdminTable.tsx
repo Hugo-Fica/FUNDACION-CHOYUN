@@ -182,7 +182,9 @@ export const UserAdminTable = () => {
           <Button
             variant='ghost'
             size='icon'
-            className={`${!!row.original.valid && 'hidden'} ${sendMail || (isPendingReSendOtp && 'cursor-not-allowed')}`}
+            className={`${!!row.original.valid && 'hidden'} ${
+              sendMail || (isPendingReSendOtp && 'cursor-not-allowed')
+            }`}
             disabled={sendMail || isPendingReSendOtp}
             onClick={async () => {
               const { id, names, lastnames, email } = row.original
@@ -215,7 +217,10 @@ export const UserAdminTable = () => {
             variant='ghost'
             size='icon'
             disabled={row.original.id === userId || role?.includes('user')}
-            className={`${row.original.id === userId || (role?.includes('user') && 'opacity-50 cursor-not-allowed')} `}
+            className={`${
+              row.original.id === userId ||
+              (role?.includes('user') && 'opacity-50 cursor-not-allowed')
+            } `}
             onClick={() => {
               setIdUser(row.original.id)
               setDeleteOpen(true)
@@ -232,7 +237,7 @@ export const UserAdminTable = () => {
 
   // Tabla de usuarios
   const table = useReactTable({
-    data: users,
+    data: users || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,

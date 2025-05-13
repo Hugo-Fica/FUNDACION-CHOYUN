@@ -1,8 +1,32 @@
 import { CreateScheduleRequest, ScheduleMongo } from '@/types/schedule'
 import axios, { AxiosError } from 'axios'
-import { CreateClassRequest } from '../types/class'
+import { ClassAPI, CreateClassRequest } from '../types/class'
+import { StudentsTeachersClass } from '../types/schedule'
 
 export const useScheduleClass = () => {
+  const getScheduleClass = async () => {
+    try {
+      const { data } = await axios.get('/api/protected/schedule')
+
+      return {
+        data: data as ScheduleMongo[],
+        message: 'Lista de horarios cargada'
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          message: err.response.data.message,
+          data: null
+        }
+      } else {
+        return {
+          message: 'Error desconocido',
+          data: null
+        }
+      }
+    }
+  }
   const postScheduleClass = async (schedule: CreateScheduleRequest) => {
     try {
       const { data } = await axios.post('/api/protected/schedule', schedule)
@@ -23,13 +47,12 @@ export const useScheduleClass = () => {
       }
     }
   }
-  const getScheduleClass = async () => {
+  const getClass = async () => {
     try {
-      const { data } = await axios.get('/api/protected/schedule')
-
+      const { data } = await axios.get('/api/protected/class')
       return {
-        data: data as ScheduleMongo[],
-        message: 'Lista de horarios cargada'
+        data: data.classChoyun as ClassAPI[],
+        message: 'Lista de clases cargada'
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
@@ -66,5 +89,74 @@ export const useScheduleClass = () => {
       }
     }
   }
-  return { getScheduleClass, postScheduleClass, postClass }
+
+  const getStudentsClass = async (classId: string) => {
+    try {
+      const { data } = await axios.get(`/api/protected/class/${classId}/student`)
+      console.log(data)
+      return { userClass: data as StudentsTeachersClass[], message: 'Lista de alumnos cargada' }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          userClass: null,
+          message: err.response.data.message
+        }
+      } else {
+        return {
+          userClass: null,
+          message: 'Error desconocido'
+        }
+      }
+    }
+  }
+  const postAddStudentClass = async (classData: { classId: string; studentId: string }) => {
+    try {
+      const { data } = await axios.post(`/api/protected/class/${classData.classId}/student`, {
+        studentId: classData.studentId
+      })
+      return {
+        data
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          message: err.response.data.message
+        }
+      } else {
+        return {
+          message: 'Error desconocido'
+        }
+      }
+    }
+  }
+
+  const postAddTeacherClass = async (classData: { classId: string; teacherId: string }) => {
+    try {
+      await axios.post(`/api/protected/class/${classData.classId}/teacher`, {
+        teacherId: classData.teacherId
+      })
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          message: err.response.data.message
+        }
+      } else {
+        return {
+          message: 'Error desconocido'
+        }
+      }
+    }
+  }
+  return {
+    getScheduleClass,
+    postScheduleClass,
+    getClass,
+    postClass,
+    postAddStudentClass,
+    postAddTeacherClass,
+    getStudentsClass
+  }
 }

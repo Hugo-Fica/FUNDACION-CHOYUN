@@ -81,7 +81,7 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
   })
 
   const selectedSchedules = useMemo(
-    () => schedules.filter((item) => selectedValues.includes(item.id)),
+    () => schedules?.filter((item) => selectedValues.includes(item.id)),
     [selectedValues, schedules]
   )
 
@@ -188,7 +188,7 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                                 field.value.length > 0 && 'pb-1'
                               )}
                               onClick={() => setOpenPopover(!openPopover)}>
-                              {selectedSchedules.length > 0 ? (
+                              {selectedSchedules && selectedSchedules.length > 0 ? (
                                 <div className='flex flex-wrap gap-1'>
                                   {selectedSchedules.map((item) => (
                                     <Badge
@@ -244,45 +244,46 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                                 <CommandList>
                                   <CommandEmpty>Horario no encontrado.</CommandEmpty>
                                   <CommandGroup className='max-h-[12rem] overflow-auto'>
-                                    {schedules.map((item) => {
-                                      const isSelected = field.value.includes(item.id)
-                                      return (
-                                        <CommandItem
-                                          key={item.id}
-                                          onSelect={() => {
-                                            let newValues
-                                            if (isSelected) {
-                                              newValues = field.value.filter(
-                                                (value) => value !== item.id
-                                              )
-                                            } else {
-                                              newValues = [...field.value, item.id]
-                                            }
-                                            setSelectedValues(newValues)
-                                            field.onChange(newValues)
-                                          }}>
-                                          <div
-                                            className={cn(
-                                              'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                                              isSelected
-                                                ? 'bg-primary text-primary-foreground'
-                                                : 'opacity-50 [&_svg]:invisible'
-                                            )}>
-                                            <svg
-                                              className='h-3 w-3'
-                                              fill='none'
-                                              stroke='currentColor'
-                                              strokeLinecap='round'
-                                              strokeLinejoin='round'
-                                              strokeWidth='2'
-                                              viewBox='0 0 24 24'>
-                                              <path d='M5 12l5 5 9-9' />
-                                            </svg>
-                                          </div>
-                                          <span>{item.name}</span>
-                                        </CommandItem>
-                                      )
-                                    })}
+                                    {schedules &&
+                                      schedules.map((item) => {
+                                        const isSelected = field.value.includes(item.id)
+                                        return (
+                                          <CommandItem
+                                            key={item.id}
+                                            onSelect={() => {
+                                              let newValues
+                                              if (isSelected) {
+                                                newValues = field.value.filter(
+                                                  (value) => value !== item.id
+                                                )
+                                              } else {
+                                                newValues = [...field.value, item.id]
+                                              }
+                                              setSelectedValues(newValues)
+                                              field.onChange(newValues)
+                                            }}>
+                                            <div
+                                              className={cn(
+                                                'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                                                isSelected
+                                                  ? 'bg-primary text-primary-foreground'
+                                                  : 'opacity-50 [&_svg]:invisible'
+                                              )}>
+                                              <svg
+                                                className='h-3 w-3'
+                                                fill='none'
+                                                stroke='currentColor'
+                                                strokeLinecap='round'
+                                                strokeLinejoin='round'
+                                                strokeWidth='2'
+                                                viewBox='0 0 24 24'>
+                                                <path d='M5 12l5 5 9-9' />
+                                              </svg>
+                                            </div>
+                                            <span>{item.name}</span>
+                                          </CommandItem>
+                                        )
+                                      })}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
@@ -320,9 +321,12 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                   Cancelar
                 </Button>
                 <Button
-                  className=' bg-green-500 hover:bg-green-700 w-full'
-                  //   disabled={isPending}
-                >
+                  className={`${
+                    isPending
+                      ? 'bg-green-500/50 hover:bg-green-700/50'
+                      : 'bg-green-500 hover:bg-green-700'
+                  }   w-full`}
+                  disabled={isPending}>
                   {isPending && <Loader2 className='animate-spin' />}
                   Crear clase
                 </Button>
