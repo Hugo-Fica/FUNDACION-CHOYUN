@@ -91,11 +91,21 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     () => users?.filter((item) => selectedTeacher.includes(item.id)),
     [selectedTeacher, users]
   )
+
   const selectedStudents = useMemo(
     () => users?.filter((item) => selectedStudent.includes(item.id)),
     [selectedStudent, users]
   )
 
+  const isUserAlreadyStudent = (userId: string): boolean => {
+    console.log(userId)
+    console.log(studentsTeachersClass)
+    return (
+      studentsTeachersClass?.some(
+        (s) => Array.isArray(s.student) && s.student.some((st) => st.id === userId)
+      ) ?? false
+    )
+  }
   const handleModal = () => {
     setOpen(!open)
     form.reset()
@@ -116,6 +126,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     console.log(algo)
   }
 
+  console.log(studentsTeachersClass)
   return (
     <>
       <Dialog
@@ -190,16 +201,22 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                       <FormControl className='w-full'>
                         <Popover
                           open={openPopoverTeacher}
-                          onOpenChange={setOpenPopoverTeacher}>
+                          onOpenChange={
+                            form.getValues('classId').length > 0 ? setOpenPopoverTeacher : () => {}
+                          }>
                           <PopoverTrigger asChild>
                             <div
                               aria-controls='combobox'
                               aria-expanded={openPopoverTeacher}
                               className={cn(
                                 'flex min-h-10 w-full flex-wrap items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-                                field.value.length > 0 && 'pb-1'
+                                field.value.length > 0 && 'pb-1',
+                                form.getValues('classId').length > 0 && 'cursor-pointer'
                               )}
-                              onClick={() => setOpenPopoverTeacher(!openPopoverTeacher)}>
+                              onClick={() =>
+                                form.getValues('classId').length > 0 &&
+                                setOpenPopoverTeacher(!openPopoverTeacher)
+                              }>
                               {selectedTeachers && selectedTeachers.length > 0 ? (
                                 <div className='flex flex-wrap gap-1'>
                                   {selectedTeachers.map((item) => (
@@ -257,7 +274,13 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                   <CommandGroup className='max-h-[12rem] overflow-auto'>
                                     {users &&
                                       users
-                                        .filter((item) => !item.role.includes('user'))
+                                        .filter(
+                                          (item) =>
+                                            !item.role.includes('user') &&
+                                            !studentsTeachersClass?.some((s) =>
+                                              s.teacher?.some((t) => t.id === item.id)
+                                            )
+                                        )
                                         .map((item) => {
                                           const isSelected = field.value.includes(item.id)
                                           return (
@@ -332,16 +355,22 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                       <FormControl className='w-full'>
                         <Popover
                           open={openPopoverStudent}
-                          onOpenChange={setOpenPopoverStudent}>
+                          onOpenChange={
+                            form.getValues('classId').length > 0 ? setOpenPopoverStudent : () => {}
+                          }>
                           <PopoverTrigger asChild>
                             <div
                               aria-controls='combobox'
                               aria-expanded={openPopoverStudent}
                               className={cn(
                                 'flex min-h-10 w-full flex-wrap items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
-                                field.value.length > 0 && 'pb-1'
+                                field.value.length > 0 && 'pb-1',
+                                form.getValues('classId').length > 0 && 'cursor-pointer'
                               )}
-                              onClick={() => setOpenPopoverStudent(!openPopoverStudent)}>
+                              onClick={() =>
+                                form.getValues('classId').length > 0 &&
+                                setOpenPopoverStudent(!openPopoverStudent)
+                              }>
                               {selectedStudents && selectedStudents.length > 0 ? (
                                 <div className='flex flex-wrap gap-1'>
                                   {selectedStudents.map((item) => (
@@ -418,7 +447,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                             <div
                                               className={cn(
                                                 'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                                                isSelected
+                                                isSelected || isUserAlreadyStudent(item.id)
                                                   ? 'bg-primary text-primary-foreground'
                                                   : 'opacity-50 [&_svg]:invisible'
                                               )}>

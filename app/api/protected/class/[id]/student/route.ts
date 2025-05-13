@@ -34,6 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         }
       }
     )
+    console.log(studentsFinal)
     return NextResponse.json(studentsFinal)
   } catch (error) {
     console.error('Error fetching students:', error)
