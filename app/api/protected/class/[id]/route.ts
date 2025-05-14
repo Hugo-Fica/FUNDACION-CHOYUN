@@ -9,33 +9,10 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
 
     const classData = await prisma.class.findUnique({
       where: { id },
-      include: {
-        schedules: true,
-        teacherUsers: {
-          include: {
-            teacher: {
-              select: {
-                id: true,
-                names: true,
-                lastnames: true,
-                email: true,
-                role: true
-              }
-            }
-          }
-        },
-        studentUsers: {
-          include: {
-            student: {
-              select: {
-                id: true,
-                names: true,
-                lastnames: true,
-                email: true
-              }
-            }
-          }
-        }
+      select: {
+        id: true,
+        studentUsers: { select: { studentId: true } },
+        teacherUsers: { select: { teacherId: true } }
       }
     })
 

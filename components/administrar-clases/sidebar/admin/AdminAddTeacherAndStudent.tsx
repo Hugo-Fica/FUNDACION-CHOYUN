@@ -65,8 +65,8 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
   const [open, setOpen] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState<string[]>([])
   const [selectedStudent, setSelectedStudent] = useState<string[]>([])
-  const [studentsTeachersClass, setStudentsTeachersClass] = useState<StudentsTeachersClass[]>([])
-  const { postAddStudentClass, getStudentsClass } = useScheduleClass()
+  const [studentsTeachersClass, setStudentsTeachersClass] = useState<StudentsTeachersClass>()
+  const { postAddStudentClass, getStudentsTeachersClass } = useScheduleClass()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,6 +77,8 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     }
   })
 
+  console.log(selectedStudent)
+
   const { mutateAsync: addStudentClassAsync, isPending: isPendingAddStudentClass } = useMutation({
     mutationKey: ['addStudentClass'],
     mutationFn: postAddStudentClass
@@ -84,7 +86,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
 
   const { mutateAsync: getStudentsClassAsync, isPending } = useMutation({
     mutationKey: ['getStudentsClass'],
-    mutationFn: getStudentsClass
+    mutationFn: getStudentsTeachersClass
   })
 
   const selectedTeachers = useMemo(
@@ -98,16 +100,16 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
   )
 
   const isUserAlreadyStudent = (userId: string): boolean => {
-    console.log(userId)
-    console.log(studentsTeachersClass)
-    return (
-      studentsTeachersClass?.some(
-        (s) => Array.isArray(s.student) && s.student.some((st) => st.id === userId)
-      ) ?? false
-    )
+    const isStudent =
+      studentsTeachersClass?.studentUsers.some((st) => st.studentId === userId) ?? false
+
+    return isStudent
   }
+
   const handleModal = () => {
     setOpen(!open)
+    setSelectedTeacher([])
+    setSelectedStudent([])
     form.reset()
   }
 
@@ -125,8 +127,6 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
 
     console.log(algo)
   }
-
-  console.log(studentsTeachersClass)
   return (
     <>
       <Dialog
@@ -273,53 +273,45 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                   <CommandEmpty>Usuario no encontrado.</CommandEmpty>
                                   <CommandGroup className='max-h-[12rem] overflow-auto'>
                                     {users &&
-                                      users
-                                        .filter(
-                                          (item) =>
-                                            !item.role.includes('user') &&
-                                            !studentsTeachersClass?.some((s) =>
-                                              s.teacher?.some((t) => t.id === item.id)
-                                            )
+                                      users.map((item) => {
+                                        const isSelected = field.value.includes(item.id)
+                                        return (
+                                          <CommandItem
+                                            key={item.id}
+                                            onSelect={() => {
+                                              let newValues
+                                              if (isSelected) {
+                                                newValues = field.value.filter(
+                                                  (value) => value !== item.id
+                                                )
+                                              } else {
+                                                newValues = [...field.value, item.id]
+                                              }
+                                              setSelectedTeacher(newValues)
+                                              field.onChange(newValues)
+                                            }}>
+                                            <div
+                                              className={cn(
+                                                'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
+                                                isSelected
+                                                  ? 'bg-primary text-primary-foreground'
+                                                  : 'opacity-50 [&_svg]:invisible'
+                                              )}>
+                                              <svg
+                                                className='h-3 w-3'
+                                                fill='none'
+                                                stroke='currentColor'
+                                                strokeLinecap='round'
+                                                strokeLinejoin='round'
+                                                strokeWidth='2'
+                                                viewBox='0 0 24 24'>
+                                                <path d='M5 12l5 5 9-9' />
+                                              </svg>
+                                            </div>
+                                            <span className='uppercase'>{`${item.names} ${item.lastnames}`}</span>
+                                          </CommandItem>
                                         )
-                                        .map((item) => {
-                                          const isSelected = field.value.includes(item.id)
-                                          return (
-                                            <CommandItem
-                                              key={item.id}
-                                              onSelect={() => {
-                                                let newValues
-                                                if (isSelected) {
-                                                  newValues = field.value.filter(
-                                                    (value) => value !== item.id
-                                                  )
-                                                } else {
-                                                  newValues = [...field.value, item.id]
-                                                }
-                                                setSelectedTeacher(newValues)
-                                                field.onChange(newValues)
-                                              }}>
-                                              <div
-                                                className={cn(
-                                                  'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                                                  isSelected
-                                                    ? 'bg-primary text-primary-foreground'
-                                                    : 'opacity-50 [&_svg]:invisible'
-                                                )}>
-                                                <svg
-                                                  className='h-3 w-3'
-                                                  fill='none'
-                                                  stroke='currentColor'
-                                                  strokeLinecap='round'
-                                                  strokeLinejoin='round'
-                                                  strokeWidth='2'
-                                                  viewBox='0 0 24 24'>
-                                                  <path d='M5 12l5 5 9-9' />
-                                                </svg>
-                                              </div>
-                                              <span className='uppercase'>{`${item.names} ${item.lastnames}`}</span>
-                                            </CommandItem>
-                                          )
-                                        })}
+                                      })}
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
