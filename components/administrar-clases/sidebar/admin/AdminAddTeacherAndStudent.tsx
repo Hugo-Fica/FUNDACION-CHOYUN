@@ -170,7 +170,17 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                           value={field.value}
                           onValueChange={async (value) => {
                             field.onChange(value)
+                            console.log(value)
                             const { userClass } = await getStudentsClassAsync(value)
+                            console.log(userClass)
+                            userClass?.map((item) => {
+                              item.student.map((studen) =>
+                                setSelectedStudent((prev) => [...prev, studen.id])
+                              )
+                              item.teacher.map((teacher) =>
+                                setSelectedTeacher((prev) => [...prev, teacher.id])
+                              )
+                            })
                             userClass && setStudentsTeachersClass(userClass)
                           }}>
                           <SelectTrigger className='w-full'>
