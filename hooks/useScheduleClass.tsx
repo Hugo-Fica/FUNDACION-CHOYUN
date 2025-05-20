@@ -90,11 +90,10 @@ export const useScheduleClass = () => {
     }
   }
 
-  const getStudentsClass = async (classId: string) => {
+  const getStudentsTeachersClass = async (classId: string) => {
     try {
-      const { data } = await axios.get(`/api/protected/class/${classId}/student`)
-      console.log(data)
-      return { userClass: data as StudentsTeachersClass[], message: 'Lista de alumnos cargada' }
+      const { data } = await axios.get(`/api/protected/class/${classId}`)
+      return { userClass: data as StudentsTeachersClass, message: 'Lista de alumnos cargada' }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       if (err.response && err.response.data && err.response.data.message) {
@@ -157,6 +156,6 @@ export const useScheduleClass = () => {
     postClass,
     postAddStudentClass,
     postAddTeacherClass,
-    getStudentsClass
+    getStudentsTeachersClass
   }
 }

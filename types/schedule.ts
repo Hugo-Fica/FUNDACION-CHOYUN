@@ -32,16 +32,17 @@ export type ScheduleAPI = {
   endTime: string
 }
 
-type userClass = {
-  id: string
-  names: string
-  lastnames: string
+type studentClass = {
+  studentId: string
+}
+type teacherClass = {
+  teacherId: string
 }
 
 export type StudentsTeachersClass = {
   id: string
-  student: userClass[]
-  teacher: userClass[]
+  studentUsers: studentClass[]
+  teacherUsers: teacherClass[]
 }
 
 export type ScheduleStore = {
