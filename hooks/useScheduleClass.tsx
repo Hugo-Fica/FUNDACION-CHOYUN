@@ -89,7 +89,6 @@ export const useScheduleClass = () => {
       }
     }
   }
-
   const getStudentsTeachersClass = async (classId: string) => {
     try {
       const { data } = await axios.get(`/api/protected/class/${classId}`)
@@ -109,13 +108,13 @@ export const useScheduleClass = () => {
       }
     }
   }
-  const postAddStudentClass = async (classData: { classId: string; studentId: string }) => {
+  const postAddStudentClass = async (classData: { classId: string; studentId: string[] }) => {
     try {
       const { data } = await axios.post(`/api/protected/class/${classData.classId}/student`, {
         studentId: classData.studentId
       })
       return {
-        data
+        message: data.message as string
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
@@ -130,12 +129,14 @@ export const useScheduleClass = () => {
       }
     }
   }
-
-  const postAddTeacherClass = async (classData: { classId: string; teacherId: string }) => {
+  const postAddTeacherClass = async (classData: { classId: string; teacherId: string[] }) => {
     try {
-      await axios.post(`/api/protected/class/${classData.classId}/teacher`, {
+      const { data } = await axios.post(`/api/protected/class/${classData.classId}/teacher`, {
         teacherId: classData.teacherId
       })
+      return {
+        message: data.message as string
+      }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       if (err.response && err.response.data && err.response.data.message) {

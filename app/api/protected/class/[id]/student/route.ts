@@ -34,7 +34,6 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         }
       }
     )
-    console.log(studentsFinal)
     return NextResponse.json(studentsFinal)
   } catch (error) {
     console.error('Error fetching students:', error)
@@ -52,51 +51,69 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
     const body: AddStudentRequest = await request.json()
     const { studentId } = body
 
-    if (!studentId) {
-      return NextResponse.json({ error: 'No hay alumno seleccionado' }, { status: 400 })
+    if (!Array.isArray(studentId)) {
+      return NextResponse.json(
+        { error: 'Se requiere un arreglo de IDs de alumnos' },
+        { status: 400 }
+      )
     }
 
-    // Verificar que la clase existe
     const classExists = await prisma.class.findUnique({
       where: { id: classId }
     })
 
     if (!classExists) {
-      return NextResponse.json({ error: 'La clase seleccionada no existe' }, { status: 404 })
+      return NextResponse.json({ error: 'La clase no existe' }, { status: 404 })
     }
 
-    // Verificar que el usuario existe
-    const student = await prisma.users.findUnique({
-      where: { id: studentId }
+    const validStudents = await prisma.users.findMany({
+      where: { id: { in: studentId } }
     })
 
-    if (!student) {
-      return NextResponse.json({ error: 'El alumno seleccionado no existe' }, { status: 404 })
+    const validStudentsIds = validStudents.map((student) => student.id)
+
+    if (validStudentsIds.length !== studentId.length) {
+      return NextResponse.json({ error: 'Uno o más alumnos no existe' }, { status: 404 })
     }
 
-    // Verificar si ya existe la relación
-    const existingRelation = await prisma.studentInClass.findFirst({
-      where: {
-        studentId,
-        classId
-      }
+    const currentRelations = await prisma.studentInClass.findMany({
+      where: { classId }
     })
 
-    if (existingRelation) {
-      return NextResponse.json({ error: 'El alumno ya está inscrito en la clase' }, { status: 400 })
+    const currentStudentIds = currentRelations.map((item) => item.id)
+
+    const studentsToAdd = validStudentsIds.filter((id) => !currentStudentIds.includes(id))
+
+    const studentsToRemove = currentStudentIds.filter((id) => !validStudentsIds.includes(id))
+
+    if (studentsToAdd.length > 0) {
+      await Promise.all(
+        studentsToAdd.map(async (studentId) => {
+          await prisma.studentInClass.create({
+            data: {
+              studentId,
+              classId
+            }
+          })
+        })
+      )
     }
 
-    // Crear la relación
-    const studentInClass = await prisma.studentInClass.create({
-      data: {
-        studentId,
-        classId
-      }
-    })
+    if (studentsToRemove.length > 0) {
+      await Promise.all(
+        studentsToRemove.map(async (studentId) => {
+          await prisma.studentInClass.delete({
+            where: {
+              id: studentId,
+              classId
+            }
+          })
+        })
+      )
+    }
 
-    return NextResponse.json(studentInClass, { status: 201 })
+    return NextResponse.json({ message: 'Clase  actualizada correctamente' }, { status: 201 })
   } catch (error) {
-    console.error('Error adding student to class:', error)
     return NextResponse.json(
       { error: 'Error adding student to class', details: (error as Error).message },
       { status: 500 }

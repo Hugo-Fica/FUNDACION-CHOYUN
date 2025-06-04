@@ -37,7 +37,6 @@ import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { useUserAuthStore } from '@/store/userAuthStore'
 import { useScheduleStore } from '@/store/useScheduleStore'
 import { useUserStore } from '@/store/useUserStore'
-import { StudentsTeachersClass } from '@/types/schedule'
 import { cn } from '@/utils/calculate'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
@@ -65,8 +64,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
   const [open, setOpen] = useState(false)
   const [selectedTeacher, setSelectedTeacher] = useState<string[]>([])
   const [selectedStudent, setSelectedStudent] = useState<string[]>([])
-  const [studentsTeachersClass, setStudentsTeachersClass] = useState<StudentsTeachersClass>()
-  const { postAddStudentClass, getStudentsTeachersClass } = useScheduleClass()
+  const { postAddStudentClass, getStudentsTeachersClass, postAddTeacherClass } = useScheduleClass()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -77,11 +75,13 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     }
   })
 
-  console.log(selectedStudent)
-
   const { mutateAsync: addStudentClassAsync, isPending: isPendingAddStudentClass } = useMutation({
     mutationKey: ['addStudentClass'],
     mutationFn: postAddStudentClass
+  })
+  const { mutateAsync: addTeacherClassAsync, isPending: isPendingAddTeacherClass } = useMutation({
+    mutationKey: ['addTeacherClass'],
+    mutationFn: postAddTeacherClass
   })
 
   const { mutateAsync: getStudentsClassAsync, isPending } = useMutation({
@@ -99,13 +99,6 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     [selectedStudent, users]
   )
 
-  const isUserAlreadyStudent = (userId: string): boolean => {
-    const isStudent =
-      studentsTeachersClass?.studentUsers.some((st) => st.studentId === userId) ?? false
-
-    return isStudent
-  }
-
   const handleModal = () => {
     setOpen(!open)
     setSelectedTeacher([])
@@ -114,18 +107,17 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
   }
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    //ASIGNAR PROFESOR A CLASE
     //ASIGNAR ESTUDIANTE A CLASE
-    const algo = await Promise.all(
-      values.studentsIds.map(async (item) => {
-        await addStudentClassAsync({
-          classId: values.classId,
-          studentId: item
-        })
-      })
-    )
+    await addStudentClassAsync({
+      classId: values.classId,
+      studentId: values.studentsIds
+    })
 
-    console.log(algo)
+    //ASIGNAR PROFESOR A CLASE
+    await addTeacherClassAsync({
+      classId: values.classId,
+      teacherId: values.teacherIds
+    })
   }
   return (
     <>
@@ -170,18 +162,32 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                           value={field.value}
                           onValueChange={async (value) => {
                             field.onChange(value)
-                            console.log(value)
+                            form.setValue('studentsIds', [])
+                            form.setValue('teacherIds', [])
+                            setSelectedTeacher([])
                             const { userClass } = await getStudentsClassAsync(value)
-                            console.log(userClass)
-                            userClass?.map((item) => {
-                              item.student.map((studen) =>
-                                setSelectedStudent((prev) => [...prev, studen.id])
+                            if (userClass && userClass?.studentUsers.length > 0) {
+                              setSelectedStudent(
+                                userClass?.studentUsers.map((item) => item.studentId)
                               )
-                              item.teacher.map((teacher) =>
-                                setSelectedTeacher((prev) => [...prev, teacher.id])
+                              form.setValue(
+                                'studentsIds',
+                                userClass?.studentUsers.map((item) => item.studentId)
                               )
-                            })
-                            userClass && setStudentsTeachersClass(userClass)
+                            } else {
+                              setSelectedStudent([])
+                            }
+                            if (userClass && userClass?.teacherUsers.length > 0) {
+                              setSelectedTeacher(
+                                userClass?.teacherUsers.map((item) => item.teacherId)
+                              )
+                              form.setValue(
+                                'teacherIds',
+                                userClass?.teacherUsers.map((item) => item.teacherId)
+                              )
+                            } else {
+                              setSelectedTeacher([])
+                            }
                           }}>
                           <SelectTrigger className='w-full'>
                             <SelectValue placeholder='Selecciona una clase' />
@@ -295,7 +301,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                                   (value) => value !== item.id
                                                 )
                                               } else {
-                                                newValues = [...field.value, item.id]
+                                                newValues = [...selectedTeacher, item.id]
                                               }
                                               setSelectedTeacher(newValues)
                                               field.onChange(newValues)
@@ -441,7 +447,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                                   (value) => value !== item.id
                                                 )
                                               } else {
-                                                newValues = [...field.value, item.id]
+                                                newValues = [...selectedStudent, item.id]
                                               }
                                               setSelectedStudent(newValues)
                                               field.onChange(newValues)
@@ -449,7 +455,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                                             <div
                                               className={cn(
                                                 'mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary',
-                                                isSelected || isUserAlreadyStudent(item.id)
+                                                isSelected
                                                   ? 'bg-primary text-primary-foreground'
                                                   : 'opacity-50 [&_svg]:invisible'
                                               )}>
