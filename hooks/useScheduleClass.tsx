@@ -114,16 +114,19 @@ export const useScheduleClass = () => {
         studentId: classData.studentId
       })
       return {
+        ok: true,
         message: data.message as string
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       if (err.response && err.response.data && err.response.data.message) {
         return {
+          ok: false,
           message: err.response.data.message
         }
       } else {
         return {
+          ok: false,
           message: 'Error desconocido'
         }
       }
@@ -135,16 +138,19 @@ export const useScheduleClass = () => {
         teacherId: classData.teacherId
       })
       return {
+        ok: true,
         message: data.message as string
       }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       if (err.response && err.response.data && err.response.data.message) {
         return {
+          ok: false,
           message: err.response.data.message
         }
       } else {
         return {
+          ok: false,
           message: 'Error desconocido'
         }
       }

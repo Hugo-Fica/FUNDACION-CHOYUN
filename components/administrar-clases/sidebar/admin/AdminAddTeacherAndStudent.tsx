@@ -40,9 +40,10 @@ import { useUserStore } from '@/store/useUserStore'
 import { cn } from '@/utils/calculate'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Users, X } from 'lucide-react'
+import { Loader2, Users, X } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 type Props = {
@@ -108,16 +109,28 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     //ASIGNAR ESTUDIANTE A CLASE
-    await addStudentClassAsync({
+    const { ok: okStudent, message: msgStudent } = await addStudentClassAsync({
       classId: values.classId,
       studentId: values.studentsIds
     })
-
+    if (!okStudent) {
+      toast.error(msgStudent)
+    }
+    if (okStudent) {
+      toast.success(msgStudent)
+    }
     //ASIGNAR PROFESOR A CLASE
-    await addTeacherClassAsync({
+    const { ok: okTeacher, message: msgTeacher } = await addTeacherClassAsync({
       classId: values.classId,
       teacherId: values.teacherIds
     })
+    if (!okTeacher) {
+      toast.error(msgTeacher)
+    }
+    if (okTeacher) {
+      toast.success(msgTeacher)
+    }
+    handleModal()
   }
   return (
     <>
@@ -505,16 +518,17 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                   type='button'
                   className='w-full'
                   variant='ghost'
-                  // disabled={isPending}
+                  disabled={isPendingAddStudentClass || isPendingAddTeacherClass}
                   onClick={handleModal}>
-                  {/* {isPending && <Loader2 className='animate-spin' />} */}
+                  {isPendingAddStudentClass ||
+                    (isPendingAddTeacherClass && <Loader2 className='animate-spin' />)}
                   Cancelar
                 </Button>
                 <Button
                   className=' bg-green-500 hover:bg-green-700 w-full'
-                  // disabled={isPending}
-                >
-                  {/* {isPending && <Loader2 className='animate-spin' />} */}
+                  disabled={isPendingAddStudentClass || isPendingAddTeacherClass}>
+                  {isPendingAddStudentClass ||
+                    (isPendingAddTeacherClass && <Loader2 className='animate-spin' />)}
                   Asignar usuarios
                 </Button>
               </DialogFooter>

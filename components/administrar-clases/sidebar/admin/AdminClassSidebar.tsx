@@ -54,13 +54,17 @@ export const AdminClassSidebar = () => {
       </SidebarHeader>
       <SidebarContent className='z-[9]'>
         <SidebarGroup
-          title='Administrar información basica'
+          title='Crear horarios'
           className='gap-3'>
           <AdminAddScheduleModal sidebarState={open} />
+        </SidebarGroup>
+        <SidebarGroup
+          title='Crear clases'
+          className='gap-3'>
           <AdminAddClassModal sidebarState={open} />
         </SidebarGroup>
         <SidebarGroup
-          title='Administrar información basica'
+          title='Asignar profesores y estudiantes'
           className='gap-3'>
           <AdminAddTeacherAndStudent sidebarState={open} />
         </SidebarGroup>

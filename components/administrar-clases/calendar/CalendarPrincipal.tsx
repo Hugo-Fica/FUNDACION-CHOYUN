@@ -26,6 +26,7 @@ import { AdminClassSidebar } from '../sidebar/admin/AdminClassSidebar'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { useQuery } from '@tanstack/react-query'
 import { useScheduleStore } from '@/store/useScheduleStore'
+import { useViewClassCalendar } from '@/hooks/useViewClassCalendar'
 
 const locales = {
   es: es
@@ -44,7 +45,7 @@ export const CalendarPrincipal = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false)
   const { getClass, getScheduleClass } = useScheduleClass()
-  const { setSchedules, setClasses } = useScheduleStore((state) => state)
+  const { setSchedules, setClasses, classes, schedules } = useScheduleStore((state) => state)
 
   const { data: dataClass, isPending: isPendingClass } = useQuery({
     queryKey: ['getClass'],
@@ -61,12 +62,14 @@ export const CalendarPrincipal = () => {
     }
   }, [dataSchedules, isPendingSchedules, setSchedules])
 
+  const { events: e } = useViewClassCalendar(schedules)
+  console.log(e)
   useEffect(() => {
     if (dataClass?.data) {
       setClasses(dataClass.data)
     }
   }, [dataClass, isPendingClass, setClasses])
-
+  console.log(classes)
   return (
     <SidebarProvider className='md:min-h-[95%]'>
       <SidebarInset className='p-10'>
@@ -84,7 +87,7 @@ export const CalendarPrincipal = () => {
             <CardContent className='p-0 '>
               <DnDCalendar
                 localizer={localizer}
-                events={events}
+                events={e}
                 // startAccessor='start'
                 // endAccessor='end'
                 style={{ height: '45rem' }}

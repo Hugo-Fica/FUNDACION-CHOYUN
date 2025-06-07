@@ -112,7 +112,7 @@ export async function POST(request: NextRequest, { params }: RouteParams): Promi
       )
     }
 
-    return NextResponse.json({ message: 'Clase  actualizada correctamente' }, { status: 201 })
+    return NextResponse.json({ message: 'Profesores modificados correctamente' }, { status: 201 })
   } catch (error) {
     return NextResponse.json(
       { error: 'Error adding teacher to class', details: (error as Error).message },
