@@ -26,8 +26,6 @@ model Schedule {
   startTime String    // formato: "HH:MM"
   endTime   String    // formato: "HH:MM"
   day       String
-  color     String
-  duration  Int
   // Relación explícita para clases (many-to-many)
   classIds String[] @db.ObjectId
   classes Class[] @relation(fields: [classIds], references: [id])
@@ -41,7 +39,8 @@ model Class {
   id           String           @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   description  String?
-  
+  color     String
+  duration  Int
   // Relación explícita para horarios (many-to-many)
   scheduleIds String[] @db.ObjectId
   schedules   Schedule[] @relation(fields: [scheduleIds], references: [id])
