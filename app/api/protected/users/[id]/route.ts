@@ -10,13 +10,12 @@ export async function GET(request: NextRequest) {
       include: { role: { select: { name: true } } }
     })
     if (!user) return NextResponse.json({ message: 'No se encontró el usuario' })
-    const adjustedDate = dayjs(user?.birthday).add(4, 'hour')
-    const formattedBirthday = adjustedDate.format('DD/MM/YYYY')
+
     const userFinal = {
       email: user?.email,
       names: user?.names,
       lastnames: user?.lastnames,
-      birthday: formattedBirthday,
+      birthday: user.birthday,
       age: user?.age,
       phone: user?.phone,
       role: user?.role?.name

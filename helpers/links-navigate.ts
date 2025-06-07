@@ -46,6 +46,11 @@ export const linksNavigateAuth: LinkTypeAuth[] = [
     url: '/auth/administrar-usuarios',
     auth: ['sup_admin', 'admin']
   },
+  {
+    title: 'Administrar clases',
+    url: '/auth/administrar-clases',
+    auth: ['sup_admin', 'admin']
+  },
   { title: 'Volver al inicio', url: '/', auth: ['user'] }
 ]
 export const publicRoutes = [
@@ -67,4 +72,4 @@ export const publicRoutes = [
   'sumate/tienda-solidaria',
   'sumate/voluntarixs'
 ]
-export const authRoutes = ['administrar-usuarios']
+export const authRoutes = ['administrar-usuarios', 'administrar-clases']

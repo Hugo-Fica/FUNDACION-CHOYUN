@@ -26,7 +26,6 @@ export const sendOtpMail = async (
     })
     return { succes: true }
   } catch (error) {
-    console.log(error)
     return { succes: false }
   }
 }

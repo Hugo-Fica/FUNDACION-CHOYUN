@@ -31,6 +31,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { User } from '@/types/user'
 import { useUsers } from '@/hooks/useUsers'
 import { toast } from 'sonner'
+import dayjs from 'dayjs'
+import 'dayjs/locale/es' // idioma español
+import localizedFormat from 'dayjs/plugin/localizedFormat'
+
+dayjs.extend(localizedFormat)
+dayjs.locale('es')
 
 const formSchema = z.object({
   names: z.string().min(6, { message: 'Los nombres son obligatorios' }),
@@ -89,7 +95,6 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
       toast.error('Error al actualizar el usuario')
     }
   }
-
   useEffect(() => {
     form.setValue('names', user.names)
     form.setValue('lastnames', user.lastnames)
@@ -97,7 +102,7 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
     form.setValue('phone', user.phone)
     form.setValue('role', roles.find((r) => r.name === user.role)?.id || '')
     form.setValue('age', user.age)
-    form.setValue('birthday', new Date(user.birthday).toLocaleDateString('es-CL'))
+    form.setValue('birthday', dayjs(user.birthday).format('D [de] MMMM [de] YYYY'))
   }, [user, form, roles])
   return (
     <>
@@ -193,15 +198,7 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
                                 'w-full pl-3 text-left font-normal',
                                 !field.value && 'text-muted-foreground'
                               )}>
-                              {field.value ? (
-                                new Date(field.value).toLocaleDateString('es-CL', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })
-                              ) : (
-                                <span>Selecciona una fecha</span>
-                              )}
+                              {field.value ? field.value : <span>Selecciona una fecha</span>}
                               <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
                             </Button>
                           </FormControl>
@@ -273,7 +270,8 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
               </div>
               <DialogFooter className='flex mt-3 flex-row w-full gap-5 justify-center'>
                 <Button
-                  className='mt-3  bg-yellow-500  hover:bg-yellow-700 w-full'
+                  className='mt-3 w-full'
+                  variant={'ghost'}
                   onClick={() => setOpen(false)}
                   disabled={isPending}>
                   {isPending && <Loader2 className='animate-spin' />}

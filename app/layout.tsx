@@ -55,9 +55,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='es'>
       <body className={inter.className}>
-        <div className='flex flex-col min-h-screen '>
+        <div className='flex flex-col min-h-screen'>
           <ClientProviders>
-            <NavigationMenuPage />
+            <div className='h-16 md:h-16'>
+              <NavigationMenuPage />
+            </div>
             <main className='flex-grow flex justify-center items-center'>{children}</main>
             <Footer />
           </ClientProviders>

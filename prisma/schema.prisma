@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,55 +10,95 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Roles{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
+model Roles {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   // "teacher", "student", "admin", etc.
   description String
-  users Users[]
+  users       Users[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-model Day{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  day_name String
-  schedules Schedule[]
+
+model Schedule {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String    
+  startTime String    // formato: "HH:MM"
+  endTime   String    // formato: "HH:MM"
+  day       String
+  
+  // Relación explícita para clases (many-to-many)
+  classIds String[] @db.ObjectId
+  classes Class[] @relation(fields: [classIds], references: [id])
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
-model Schedule{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  start_time String
-  end_time String
-  day_id String @db.ObjectId
-  day Day @relation(fields: [day_id], references: [id])
-  class Class[]
+model Class {
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String?
+  
+  // Relación explícita para horarios (many-to-many)
+  scheduleIds String[] @db.ObjectId
+  schedules   Schedule[] @relation(fields: [scheduleIds], references: [id])
+  
+  teacherUsers TeacherInClass[] // Relación explícita para profesores
+  studentUsers StudentInClass[] // Relación explícita para estudiantes
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
 }
-model Class{
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  name String
-  schedule_id String @db.ObjectId
-  schedule Schedule @relation(fields: [schedule_id], references: [id])
+
+model TeacherInClass {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  teacher   Users    @relation(fields: [teacherId], references: [id])
+  teacherId String   @db.ObjectId
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([teacherId, classId])
+}
+
+model StudentInClass {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  student   Users    @relation(fields: [studentId], references: [id])
+  studentId String   @db.ObjectId
+  class     Class    @relation(fields: [classId], references: [id])
+  classId   String   @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, classId])
 }
 
 model Otp {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  code String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  code      String
   expiresAt DateTime
-  createAt DateTime @default(now())
-  user_id String @unique @db.ObjectId
-  user Users @relation(fields: [user_id],references: [id], onDelete: Cascade)
-  token String @unique
+  createAt  DateTime @default(now())
+  user_id   String   @unique @db.ObjectId
+  user      Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  token     String   @unique
 }
 
 model Users {
-  id    String  @id @default(auto()) @map("_id") @db.ObjectId
-  email String  @unique
-  names  String?
-  lastnames String?
-  password String?
-  birthday DateTime?
-  age Int?
-  phone String?
-  otp Otp?
-  valid Boolean @default(false)
-  role_id String @db.ObjectId
-  role Roles @relation(fields: [role_id], references: [id])
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  email       String           @unique
+  names       String?
+  lastnames   String?
+  password    String?
+  birthday    DateTime?
+  age         Int?
+  phone       String?
+  otp         Otp?
+  valid       Boolean          @default(false)
+  role_id     String           @db.ObjectId
+  role        Roles            @relation(fields: [role_id], references: [id])
+  teacherClasses TeacherInClass[] // Clases donde es profesor
+  studentClasses StudentInClass[] // Clases donde es estudiante
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
