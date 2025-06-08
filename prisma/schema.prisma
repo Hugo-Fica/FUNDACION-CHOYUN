@@ -39,8 +39,8 @@ model Class {
   id           String           @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   description  String?
-  color     String
-  duration  Int
+  color        String
+  duration     Int
   // Relación explícita para horarios (many-to-many)
   scheduleIds String[] @db.ObjectId
   schedules   Schedule[] @relation(fields: [scheduleIds], references: [id])
