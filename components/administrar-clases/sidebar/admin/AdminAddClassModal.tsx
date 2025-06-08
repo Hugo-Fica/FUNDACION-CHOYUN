@@ -48,7 +48,9 @@ const formSchema = z.object({
   description: z.string(),
   scheduleIds: z
     .array(z.string())
-    .min(1, { message: 'Debe seleccionar al menos una hora de clase' })
+    .min(1, { message: 'Debe seleccionar al menos una hora de clase' }),
+  duration: z.number().min(0, { message: 'La duración de la clase es obligatoria' }),
+  color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' })
 })
 
 type Props = {
@@ -68,7 +70,9 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
     defaultValues: {
       name: '',
       description: '',
-      scheduleIds: []
+      scheduleIds: [],
+      duration: undefined,
+      color: ''
     }
   })
 
@@ -90,13 +94,15 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
     form.reset()
     setSelectedValues([])
   }
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const isPosted = await postClassAsync({
       name: values.name,
       description: values.description,
-      scheduleIds: values.scheduleIds
+      scheduleIds: values.scheduleIds,
+      duration: values.duration,
+      color: values.color
     })
+
     if (isPosted) {
       toast.success('Clase creada exitosamente')
       form.reset()
@@ -287,6 +293,7 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                                   </CommandGroup>
                                 </CommandList>
                               </Command>
+
                               <div className='flex justify-center gap-5 my-3 px-3'>
                                 <Button
                                   type='button'
@@ -304,6 +311,45 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                             </>
                           </PopoverContent>
                         </Popover>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='duration'
+                  render={({ field }) => (
+                    <FormItem className='col-span-1 '>
+                      <FormLabel>Duración de la clase</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type='number'
+                          className='w-full [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+                          min={1}
+                          step={1}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          placeholder='Duración en semanas'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='color'
+                  render={({ field }) => (
+                    <FormItem className='col-span-1 '>
+                      <FormLabel>Color de la clase</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='color'
+                          className='w-[50px]'
+                          {...field}
+                          placeholder='Duración en semanas'
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

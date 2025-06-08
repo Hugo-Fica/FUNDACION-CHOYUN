@@ -16,6 +16,8 @@ export type CreateClassRequest = {
   name: string
   description?: string
   scheduleIds?: string[]
+  duration: number
+  color: string
 }
 
 export type UpdateClassRequest = {

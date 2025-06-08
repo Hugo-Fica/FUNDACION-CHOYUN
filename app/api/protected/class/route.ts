@@ -28,8 +28,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body: CreateClassRequest = await req.json()
-    const { name, description, scheduleIds = [] } = body
-
+    const { name, description, scheduleIds = [], duration, color } = body
     if (!name) {
       return NextResponse.json(
         { message: 'Error no se proporciono el nombre de la clase' },
@@ -49,12 +48,13 @@ export async function POST(req: NextRequest) {
         )
       }
     }
-
     const newClass = await prisma.class.create({
       data: {
         name,
         description,
-        scheduleIds
+        scheduleIds,
+        duration,
+        color
       }
     })
 
