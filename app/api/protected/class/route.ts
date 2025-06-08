@@ -9,6 +9,8 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         description: true,
+        color: true,
+        duration: true,
         schedules: { select: { id: true, name: true, day: true, startTime: true, endTime: true } },
         teacherUsers: { select: { teacher: { select: { id: true } } } },
         studentUsers: { select: { student: { select: { id: true } } } }
