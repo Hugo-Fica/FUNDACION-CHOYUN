@@ -30,6 +30,8 @@ export type ClassAPI = {
   id: string
   name: string
   description: string
+  color: string
+  duration: number
   schedules: ScheduleAPI[]
   teacherUsers: any[]
   studentUsers: any[]
