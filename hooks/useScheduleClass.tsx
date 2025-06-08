@@ -156,6 +156,28 @@ export const useScheduleClass = () => {
       }
     }
   }
+  const deleteClass = async (classId: string) => {
+    try {
+      const { data } = await axios.delete(`/api/protected/class/${classId}`)
+      return {
+        ok: true,
+        message: data.message
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          ok: false,
+          message: err.response.data.message
+        }
+      } else {
+        return {
+          ok: false,
+          message: 'Error desconocido'
+        }
+      }
+    }
+  }
   return {
     getScheduleClass,
     postScheduleClass,
@@ -163,6 +185,7 @@ export const useScheduleClass = () => {
     postClass,
     postAddStudentClass,
     postAddTeacherClass,
-    getStudentsTeachersClass
+    getStudentsTeachersClass,
+    deleteClass
   }
 }
