@@ -134,51 +134,21 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
   try {
     const { id } = params
 
-    // Verificar que la clase existe
-    const existingClass = await prisma.class.findUnique({
-      where: { id },
-      include: {
-        schedules: true,
-        teacherUsers: true,
-        studentUsers: true
-      }
-    })
+    // VERIFICAR SI CLASE EXISTE
+    const existingClass = await prisma.class.findUnique({ where: { id } })
 
+    // RETORNAR ERROR SI CLASE NO EXISTE
     if (!existingClass) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'No se encontró la clase' }, { status: 404 })
     }
-
-    // Eliminar las relaciones con horarios
-    if (existingClass.scheduleIds && existingClass.scheduleIds.length > 0) {
-      for (const scheduleId of existingClass.scheduleIds) {
-        // Primero obtenemos el horario para saber qué IDs de clase tiene actualmente
-        const schedule = await prisma.schedule.findUnique({
-          where: { id: scheduleId }
-        })
-
-        if (schedule) {
-          // Filtramos el ID de la clase actual
-          const updatedClassIds = schedule.classIds.filter((classId) => classId !== id)
-
-          // Actualizamos con el nuevo array (sin usar función callback)
-          await prisma.schedule.update({
-            where: { id: scheduleId },
-            data: {
-              classIds: updatedClassIds
-            }
-          })
-        }
-      }
-    }
-
-    // Eliminar la clase (las relaciones con profesores y estudiantes se eliminarán automáticamente)
+    // ELIMINAR LA CLASE
     await prisma.class.delete({
       where: { id }
     })
-
-    return NextResponse.json({ message: 'Class deleted successfully' }, { status: 200 })
+    // RETORNAR MENSAJE DE EXITO
+    return NextResponse.json({ message: 'Clase eliminada exitosamente' }, { status: 200 })
   } catch (error) {
-    console.error('Error deleting class:', error)
+    // RETORNAR ERROR
     return NextResponse.json(
       { error: 'Error deleting class', details: (error as Error).message },
       { status: 500 }
