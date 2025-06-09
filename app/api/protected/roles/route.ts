@@ -7,7 +7,6 @@ export async function GET() {
     if (roles.length < 1) return NextResponse.json({ message: 'No se encontraron roles' })
     return NextResponse.json({ roles: roles })
   } catch (error) {
-    console.log(error)
     return NextResponse.json({ message: 'Hubo un error', error: error }, { status: 500 })
   }
 }

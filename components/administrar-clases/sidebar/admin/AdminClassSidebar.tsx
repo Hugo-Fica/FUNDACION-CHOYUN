@@ -16,6 +16,7 @@ import { AdminAddClassModal } from './AdminAddClassModal'
 import { useScheduleStore } from '@/store/useScheduleStore'
 import { useEffect } from 'react'
 import { AdminAddTeacherAndStudent } from './AdminAddTeacherAndStudent'
+import { AdminTableModalClass } from './AdminTableModalClass'
 
 export const AdminClassSidebar = () => {
   const { open, toggleSidebar } = useSidebar()
@@ -62,6 +63,11 @@ export const AdminClassSidebar = () => {
           title='Crear clases'
           className='gap-3'>
           <AdminAddClassModal sidebarState={open} />
+        </SidebarGroup>
+        <SidebarGroup
+          title='Ver clases'
+          className='gap-3'>
+          <AdminTableModalClass sidebarState={open} />
         </SidebarGroup>
         <SidebarGroup
           title='Asignar profesores y estudiantes'

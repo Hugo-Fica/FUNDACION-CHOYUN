@@ -6,21 +6,26 @@ import { RouteParams } from '@/types/global'
 export async function GET(request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
   try {
     const { id } = params
-
     const classData = await prisma.class.findUnique({
       where: { id },
       select: {
         id: true,
-        studentUsers: { select: { studentId: true } },
-        teacherUsers: { select: { teacherId: true } }
+        name: true,
+        description: true,
+        color: true,
+        duration: true,
+        schedules: { select: { id: true } }
       }
     })
 
     if (!classData) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'No se encontró la clase' }, { status: 404 })
     }
-
-    return NextResponse.json(classData)
+    const respClass = {
+      ...classData,
+      schedules: classData.schedules.map((item) => item.id)
+    }
+    return NextResponse.json(respClass)
   } catch (error) {
     console.error('Error fetching class:', error)
     return NextResponse.json(
@@ -35,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
   try {
     const { id } = params
     const body: UpdateClassRequest = await request.json()
-    const { name, description, scheduleIds } = body
+    const { name, description, scheduleIds, color, duration } = body
 
     const existingClass = await prisma.class.findUnique({
       where: { id },
@@ -51,6 +56,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
 
     if (name !== undefined) updateData.name = name
     if (description !== undefined) updateData.description = description
+    if (color !== undefined) updateData.color = color
+    if (duration !== undefined) updateData.duration = duration
 
     // Si se proporcionan nuevos horarios
     if (scheduleIds) {
@@ -64,7 +71,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
       })
 
       if (existingSchedules.length !== scheduleIds.length) {
-        return NextResponse.json({ error: 'One or more schedule IDs are invalid' }, { status: 400 })
+        return NextResponse.json({ error: 'Uno o más horarios no existen' }, { status: 400 })
       }
 
       // Eliminar la clase de los horarios anteriores que ya no están en la lista
@@ -118,8 +125,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
       where: { id },
       data: updateData
     })
-
-    return NextResponse.json(updatedClass)
+    // Si se actualiza la clase, retorna un mensaje de exito
+    if (updatedClass)
+      return NextResponse.json({ message: 'Clase actualizada exitosamente' }, { status: 200 })
+    // Si no se actualiza la clase, retorna un mensaje de error
+    return NextResponse.json({ message: 'Error al actualizar la clase' }, { status: 500 })
   } catch (error) {
     console.error('Error updating class:', error)
     return NextResponse.json(
@@ -134,51 +144,21 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
   try {
     const { id } = params
 
-    // Verificar que la clase existe
-    const existingClass = await prisma.class.findUnique({
-      where: { id },
-      include: {
-        schedules: true,
-        teacherUsers: true,
-        studentUsers: true
-      }
-    })
+    // VERIFICAR SI CLASE EXISTE
+    const existingClass = await prisma.class.findUnique({ where: { id } })
 
+    // RETORNAR ERROR SI CLASE NO EXISTE
     if (!existingClass) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 })
+      return NextResponse.json({ error: 'No se encontró la clase' }, { status: 404 })
     }
-
-    // Eliminar las relaciones con horarios
-    if (existingClass.scheduleIds && existingClass.scheduleIds.length > 0) {
-      for (const scheduleId of existingClass.scheduleIds) {
-        // Primero obtenemos el horario para saber qué IDs de clase tiene actualmente
-        const schedule = await prisma.schedule.findUnique({
-          where: { id: scheduleId }
-        })
-
-        if (schedule) {
-          // Filtramos el ID de la clase actual
-          const updatedClassIds = schedule.classIds.filter((classId) => classId !== id)
-
-          // Actualizamos con el nuevo array (sin usar función callback)
-          await prisma.schedule.update({
-            where: { id: scheduleId },
-            data: {
-              classIds: updatedClassIds
-            }
-          })
-        }
-      }
-    }
-
-    // Eliminar la clase (las relaciones con profesores y estudiantes se eliminarán automáticamente)
+    // ELIMINAR LA CLASE
     await prisma.class.delete({
       where: { id }
     })
-
-    return NextResponse.json({ message: 'Class deleted successfully' }, { status: 200 })
+    // RETORNAR MENSAJE DE EXITO
+    return NextResponse.json({ message: 'Clase eliminada exitosamente' }, { status: 200 })
   } catch (error) {
-    console.error('Error deleting class:', error)
+    // RETORNAR ERROR
     return NextResponse.json(
       { error: 'Error deleting class', details: (error as Error).message },
       { status: 500 }

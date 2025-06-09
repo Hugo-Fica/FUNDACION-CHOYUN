@@ -4,16 +4,23 @@ import { CreateClassRequest } from '@/types/class'
 
 export async function GET(req: NextRequest) {
   try {
-    const classChoyun = await prisma.class.findMany({
+    const classes = await prisma.class.findMany({
       select: {
         id: true,
         name: true,
         description: true,
+        color: true,
+        duration: true,
         schedules: { select: { id: true, name: true, day: true, startTime: true, endTime: true } },
-        teacherUsers: { select: { id: true, teacher: true } },
-        studentUsers: { select: { id: true, student: true } }
+        teacherUsers: { select: { teacher: { select: { id: true } } } },
+        studentUsers: { select: { student: { select: { id: true } } } }
       }
     })
+    const classChoyun = classes.map((item) => ({
+      ...item,
+      teacherUsers: item.teacherUsers.map((t) => t.teacher),
+      studentUsers: item.studentUsers.map((s) => s.student)
+    }))
     return NextResponse.json({ classChoyun: classChoyun }, { status: 200 })
   } catch (error) {
     NextResponse.json({ message: 'Hubo un error', error: error }, { status: 500 })
@@ -23,8 +30,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body: CreateClassRequest = await req.json()
-    const { name, description, scheduleIds = [] } = body
-
+    const { name, description, schedules: scheduleIds = [], duration, color } = body
     if (!name) {
       return NextResponse.json(
         { message: 'Error no se proporciono el nombre de la clase' },
@@ -44,12 +50,13 @@ export async function POST(req: NextRequest) {
         )
       }
     }
-
     const newClass = await prisma.class.create({
       data: {
         name,
         description,
-        scheduleIds
+        scheduleIds,
+        duration,
+        color
       }
     })
 

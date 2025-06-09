@@ -2,11 +2,7 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
-import { Calendar, dateFnsLocalizer, View, Views } from 'react-big-calendar'
-import { format } from 'date-fns/format'
-import { parse } from 'date-fns/parse'
-import { startOfWeek } from 'date-fns/startOfWeek'
-import { getDay } from 'date-fns/getDay'
+import { Calendar, dayjsLocalizer, View, Views } from 'react-big-calendar'
 import { es } from 'date-fns/locale'
 import dayjs from 'dayjs'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
@@ -32,13 +28,7 @@ const locales = {
   es: es
 }
 const DnDCalendar = withDragAndDrop(Calendar)
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales
-})
+const localizer = dayjsLocalizer(dayjs)
 export const CalendarPrincipal = () => {
   const [date, setDate] = useState<Date>(new Date())
   const [events, setEvents] = useState<Event[]>([])
@@ -63,13 +53,11 @@ export const CalendarPrincipal = () => {
   }, [dataSchedules, isPendingSchedules, setSchedules])
 
   const { events: e } = useViewClassCalendar(schedules)
-  console.log(e)
   useEffect(() => {
     if (dataClass?.data) {
       setClasses(dataClass.data)
     }
   }, [dataClass, isPendingClass, setClasses])
-  console.log(classes)
   return (
     <SidebarProvider className='md:min-h-[95%]'>
       <SidebarInset className='p-10'>

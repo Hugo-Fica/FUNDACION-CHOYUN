@@ -1,23 +1,12 @@
 'use client'
-
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList
-} from '@/components/ui/command'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-  DialogTrigger
+  DialogTitle
 } from '@/components/ui/dialog'
 import {
   Form,
@@ -30,18 +19,34 @@ import {
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
-import { useUserAuthStore } from '@/store/userAuthStore'
-import { useScheduleStore } from '@/store/useScheduleStore'
 import { cn } from '@/utils/calculate'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2, NotebookPen, X } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { Loader2, X } from 'lucide-react'
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { AdminAddScheduleModal } from './AdminAddScheduleModal'
-import { useScheduleClass } from '@/hooks/useScheduleClass'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command'
+import { Button } from '@/components/ui/button'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { toast } from 'sonner'
+import { useScheduleStore } from '@/store/useScheduleStore'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { CreateClassRequest } from '@/types/class'
+import { useScheduleClass } from '@/hooks/useScheduleClass'
+
+type Props = {
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+  classId: string
+  classEdit: CreateClassRequest | null
+}
 
 const formSchema = z.object({
   name: z.string().min(5, { message: 'El nombre de la clase es obligatorio' }),
@@ -53,17 +58,16 @@ const formSchema = z.object({
   color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' })
 })
 
-type Props = {
-  sidebarState: boolean
-}
-export const AdminAddClassModal = ({ sidebarState }: Props) => {
-  const role = useUserAuthStore((state) => state.user?.role)
+export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props) => {
+  const queryClient = useQueryClient()
   const { schedules } = useScheduleStore((state) => state)
-  const { postClass } = useScheduleClass()
-  const queryCLient = useQueryClient()
-  const [open, setOpen] = useState(false)
   const [openPopover, setOpenPopover] = useState(false)
   const [selectedValues, setSelectedValues] = useState<string[]>([])
+  const { putClass } = useScheduleClass()
+  const selectedSchedules = schedules?.filter((item) => selectedValues.includes(item.id))
+  const handleModal = () => {
+    setOpen(!open)
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -75,34 +79,24 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
       color: ''
     }
   })
-
-  const { isPending, mutateAsync: postClassAsync } = useMutation({
-    mutationKey: ['createClass'],
-    mutationFn: postClass,
+  const { isPending, mutateAsync: putClassAsync } = useMutation({
+    mutationKey: ['updateClass'],
+    mutationFn: putClass,
     onSuccess: () => {
-      queryCLient.invalidateQueries()
+      queryClient.invalidateQueries()
     }
   })
-
-  const selectedSchedules = useMemo(
-    () => schedules?.filter((item) => selectedValues.includes(item.id)),
-    [selectedValues, schedules]
-  )
-
-  const handleModal = () => {
-    setOpen(!open)
-    form.reset()
-    setSelectedValues([])
-  }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const isPosted = await postClassAsync({
-      name: values.name,
-      description: values.description,
-      schedules: values.scheduleIds,
-      duration: values.duration,
-      color: values.color
+    const isPosted = await putClassAsync({
+      id: classId,
+      classUpdate: {
+        name: values.name,
+        description: values.description,
+        scheduleIds: values.scheduleIds,
+        duration: values.duration,
+        color: values.color
+      }
     })
-
     if (isPosted) {
       toast.success('Clase creada exitosamente')
       form.reset()
@@ -112,33 +106,26 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
       toast.error('Error al crear la clase')
     }
   }
+  useEffect(() => {
+    if (!classEdit) return
+    form.setValue('name', classEdit.name)
+    form.setValue('description', classEdit.description || '')
+    form.setValue('duration', classEdit.duration)
+    form.setValue('color', classEdit.color)
+    form.setValue('scheduleIds', classEdit.schedules || [])
+    setSelectedValues(classEdit.schedules || [])
+  }, [classEdit, form])
   return (
     <>
       <Dialog
         open={open}
         onOpenChange={handleModal}>
-        <DialogTrigger asChild>
-          <Button
-            className={`${
-              sidebarState ? '' : 'border border-black hover:bg-black hover:bg-opacity-5'
-            } `}
-            variant='ghost'
-            disabled={role?.includes('user')}>
-            {sidebarState ? (
-              <>
-                <NotebookPen className='text-black w-4 h-4' />
-                <span>Crear clase</span>
-              </>
-            ) : (
-              <NotebookPen className='text-black w-4 h-4' />
-            )}
-          </Button>
-        </DialogTrigger>
         <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
-            <DialogTitle>Crear nueva clase</DialogTitle>
-            <DialogDescription>Completa los campos para agregar una nueva clase</DialogDescription>
+            <DialogTitle>Editar clase</DialogTitle>
+            <DialogDescription>Completa los campos para editar una clase</DialogDescription>
           </DialogHeader>
+
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className='grid md:grid-cols-2 xs:grid-cols-1 gap-4'>
