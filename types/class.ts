@@ -15,7 +15,7 @@ export type ClassMogno = BaseModel & {
 export type CreateClassRequest = {
   name: string
   description?: string
-  scheduleIds?: string[]
+  schedules?: string[]
   duration: number
   color: string
 }
@@ -24,6 +24,8 @@ export type UpdateClassRequest = {
   name?: string
   description?: string
   scheduleIds?: string[]
+  color?: string
+  duration?: number
 }
 
 export type ClassAPI = {

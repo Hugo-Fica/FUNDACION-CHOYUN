@@ -1,6 +1,6 @@
 import { CreateScheduleRequest, ScheduleMongo } from '@/types/schedule'
 import axios, { AxiosError } from 'axios'
-import { ClassAPI, CreateClassRequest } from '../types/class'
+import { ClassAPI, CreateClassRequest, UpdateClassRequest } from '../types/class'
 import { StudentsTeachersClass } from '../types/schedule'
 
 export const useScheduleClass = () => {
@@ -65,6 +65,24 @@ export const useScheduleClass = () => {
         return {
           message: 'Error desconocido',
           data: null
+        }
+      }
+    }
+  }
+  const getClassById = async (classId: string) => {
+    try {
+      const { data } = await axios.get(`/api/protected/class/${classId}`)
+      console.log(data)
+      return { editClass: data as CreateClassRequest }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          editClass: null
+        }
+      } else {
+        return {
+          editClass: null
         }
       }
     }
@@ -178,6 +196,31 @@ export const useScheduleClass = () => {
       }
     }
   }
+  const putClass = async (classData: { id: string; classUpdate: UpdateClassRequest }) => {
+    try {
+      const { data } = await axios.put(
+        `/api/protected/class/${classData.id}`,
+        classData.classUpdate
+      )
+      return {
+        ok: true,
+        message: data.message
+      }
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>
+      if (err.response && err.response.data && err.response.data.message) {
+        return {
+          ok: false,
+          message: err.response.data.message
+        }
+      } else {
+        return {
+          ok: false,
+          message: 'Error desconocido'
+        }
+      }
+    }
+  }
   return {
     getScheduleClass,
     postScheduleClass,
@@ -186,6 +229,8 @@ export const useScheduleClass = () => {
     postAddStudentClass,
     postAddTeacherClass,
     getStudentsTeachersClass,
-    deleteClass
+    deleteClass,
+    getClassById,
+    putClass
   }
 }
