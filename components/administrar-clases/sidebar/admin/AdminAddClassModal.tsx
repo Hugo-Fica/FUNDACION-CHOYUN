@@ -98,7 +98,7 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
     const isPosted = await postClassAsync({
       name: values.name,
       description: values.description,
-      scheduleIds: values.scheduleIds,
+      schedules: values.scheduleIds,
       duration: values.duration,
       color: values.color
     })

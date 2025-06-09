@@ -50,7 +50,6 @@ export async function generarTokenEdge(
 // Valida un token JWT en Edge Runtime
 export async function validarTokenEdge(token: string) {
   try {
-    console.log('Validando token en Edge Runtime:', token.substring(0, 20) + '...')
     const { payload } = await jwtVerify(token, await getSecretKey())
 
     // Verificamos que el payload contenga los campos necesarios

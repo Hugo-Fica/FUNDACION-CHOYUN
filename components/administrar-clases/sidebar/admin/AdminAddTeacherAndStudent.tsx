@@ -85,7 +85,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     mutationFn: postAddTeacherClass
   })
 
-  const { mutateAsync: getStudentsClassAsync, isPending } = useMutation({
+  const { mutateAsync: getStudentsTeachersClassAsync, isPending } = useMutation({
     mutationKey: ['getStudentsClass'],
     mutationFn: getStudentsTeachersClass
   })
@@ -178,7 +178,7 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                             form.setValue('studentsIds', [])
                             form.setValue('teacherIds', [])
                             setSelectedTeacher([])
-                            const { userClass } = await getStudentsClassAsync(value)
+                            const { userClass } = await getStudentsTeachersClassAsync(value)
                             if (userClass && userClass?.studentUsers.length > 0) {
                               setSelectedStudent(
                                 userClass?.studentUsers.map((item) => item.studentId)
