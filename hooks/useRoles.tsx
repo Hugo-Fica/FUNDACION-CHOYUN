@@ -8,7 +8,6 @@ export const useRoles = () => {
 
       return data.roles as Role[]
     } catch (error) {
-      console.log(error)
       return null
     }
   }
