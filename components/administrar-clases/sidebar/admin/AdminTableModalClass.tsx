@@ -113,8 +113,6 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel()
   })
-
-  console.log(classes)
   return (
     <>
       <Dialog

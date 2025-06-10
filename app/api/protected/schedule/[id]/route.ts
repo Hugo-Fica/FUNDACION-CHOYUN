@@ -11,7 +11,6 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     const schedule = await prisma.schedule.findUnique({
       where: { id },
       include: {
-        day: true,
         classes: {
           include: {
             teacherUsers: {
@@ -32,14 +31,13 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     })
 
     if (!schedule) {
-      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Horario no encontrado' }, { status: 404 })
     }
 
     return NextResponse.json(schedule)
   } catch (error: any) {
-    console.error('Error fetching schedule:', error)
     return NextResponse.json(
-      { error: 'Error fetching schedule', details: error.message },
+      { error: 'Error al obtener el horario', details: error.message },
       { status: 500 }
     )
   }
@@ -50,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
   try {
     const { id } = params
     const body: UpdateScheduleRequest = await request.json()
-    const { startTime, endTime, dayId, classIds } = body
+    const { startTime, endTime, day, classIds } = body
 
     // Verificar que el horario existe
     const existingSchedule = await prisma.schedule.findUnique({
@@ -59,25 +57,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
     })
 
     if (!existingSchedule) {
-      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
-    }
-
-    // Si se cambia el día, verificar que existe
-    if (dayId && dayId !== existingSchedule.dayId) {
-      const dayExists = await prisma.day.findUnique({
-        where: { id: dayId }
-      })
-
-      if (!dayExists) {
-        return NextResponse.json({ error: 'Day not found' }, { status: 404 })
-      }
+      return NextResponse.json({ error: 'Horario no encontrado' }, { status: 404 })
     }
 
     // Datos para actualizar
     const updateData: any = {}
     if (startTime !== undefined) updateData.startTime = startTime
     if (endTime !== undefined) updateData.endTime = endTime
-    if (dayId !== undefined) updateData.dayId = dayId
+    if (day !== undefined) updateData.day = day
 
     // Si se proporcionan nuevas clases
     if (classIds) {
@@ -91,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
       })
 
       if (existingClasses.length !== classIds.length) {
-        return NextResponse.json({ error: 'One or more class IDs are invalid' }, { status: 400 })
+        return NextResponse.json({ error: 'Una o más clases no existen' }, { status: 400 })
       }
 
       // Eliminar el horario de las clases anteriores que ya no están en la lista
@@ -159,9 +146,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
 
     return NextResponse.json(updatedSchedule)
   } catch (error: any) {
-    console.error('Error updating schedule:', error)
     return NextResponse.json(
-      { error: 'Error updating schedule', details: error.message },
+      { error: 'Error al actualizar el horario', details: error.message },
       { status: 500 }
     )
   }
@@ -179,7 +165,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
     })
 
     if (!existingSchedule) {
-      return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
+      return NextResponse.json({ error: 'Error al eliminar el horario' }, { status: 404 })
     }
 
     // Eliminar las relaciones con clases
@@ -212,11 +198,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
       where: { id }
     })
 
-    return NextResponse.json({ message: 'Schedule deleted successfully' }, { status: 200 })
+    return NextResponse.json({ message: 'Horario eliminado correctamente' }, { status: 200 })
   } catch (error: any) {
-    console.error('Error deleting schedule:', error)
     return NextResponse.json(
-      { error: 'Error deleting schedule', details: error.message },
+      { error: 'Error al eliminar el horario', details: error.message },
       { status: 500 }
     )
   }
