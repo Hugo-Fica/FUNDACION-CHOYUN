@@ -14,7 +14,9 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         description: true,
         color: true,
         duration: true,
-        schedules: { select: { id: true } }
+        schedules: { select: { id: true } },
+        studentUsers: { select: { studentId: true } },
+        teacherUsers: { select: { teacherId: true } }
       }
     })
 
@@ -23,7 +25,9 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     }
     const respClass = {
       ...classData,
-      schedules: classData.schedules.map((item) => item.id)
+      schedules: classData.schedules.map((item) => item.id),
+      studentUsers: classData.studentUsers.map((item) => item.studentId),
+      teacherUsers: classData.teacherUsers.map((item) => item.teacherId)
     }
     return NextResponse.json(respClass)
   } catch (error) {

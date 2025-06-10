@@ -179,24 +179,20 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                             form.setValue('teacherIds', [])
                             setSelectedTeacher([])
                             const { userClass } = await getStudentsTeachersClassAsync(value)
-                            if (userClass && userClass?.studentUsers.length > 0) {
-                              setSelectedStudent(
-                                userClass?.studentUsers.map((item) => item.studentId)
-                              )
+                            if (userClass && userClass?.studentUsers) {
+                              setSelectedStudent(userClass?.studentUsers.map((item) => item))
                               form.setValue(
                                 'studentsIds',
-                                userClass?.studentUsers.map((item) => item.studentId)
+                                userClass?.studentUsers.map((item) => item)
                               )
                             } else {
                               setSelectedStudent([])
                             }
-                            if (userClass && userClass?.teacherUsers.length > 0) {
-                              setSelectedTeacher(
-                                userClass?.teacherUsers.map((item) => item.teacherId)
-                              )
+                            if (userClass && userClass?.teacherUsers) {
+                              setSelectedTeacher(userClass?.teacherUsers.map((item) => item))
                               form.setValue(
                                 'teacherIds',
-                                userClass?.teacherUsers.map((item) => item.teacherId)
+                                userClass?.teacherUsers.map((item) => item)
                               )
                             } else {
                               setSelectedTeacher([])
