@@ -20,7 +20,7 @@ export type CreateScheduleRequest = {
 export type UpdateScheduleRequest = {
   startTime?: string
   endTime?: string
-  dayId?: string
+  day?: string
   classIds?: string[]
 }
 
@@ -31,18 +31,15 @@ export type ScheduleAPI = {
   startTime: string
   endTime: string
 }
-
-type studentClass = {
-  studentId: string
-}
-type teacherClass = {
-  teacherId: string
-}
-
 export type StudentsTeachersClass = {
   id: string
-  studentUsers: studentClass[]
-  teacherUsers: teacherClass[]
+  name: string
+  description: string
+  color: string
+  duration: number
+  schedules: string[]
+  studentUsers: string[]
+  teacherUsers: string[]
 }
 
 export type ScheduleStore = {

@@ -356,12 +356,12 @@ export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props
                 <Button
                   className={`${
                     isPending
-                      ? 'bg-green-500/50 hover:bg-green-700/50'
-                      : 'bg-green-500 hover:bg-green-700'
+                      ? 'bg-blue-500/50 hover:bg-blue-700/50'
+                      : 'bg-blue-500 hover:bg-blue-700'
                   }   w-full`}
                   disabled={isPending}>
                   {isPending && <Loader2 className='animate-spin' />}
-                  Crear clase
+                  Modificar clase
                 </Button>
               </DialogFooter>
             </form>

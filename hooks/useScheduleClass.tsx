@@ -72,7 +72,6 @@ export const useScheduleClass = () => {
   const getClassById = async (classId: string) => {
     try {
       const { data } = await axios.get(`/api/protected/class/${classId}`)
-      console.log(data)
       return { editClass: data as CreateClassRequest }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
