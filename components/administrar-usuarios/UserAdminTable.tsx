@@ -30,14 +30,12 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { useUsers } from '@/hooks/useUsers'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useUserStore } from '@/store/useUserStore'
 import { User } from '@/types/user'
 import { DataTablePagination } from '../DataTablePagination'
-import { useRoles } from '@/hooks/useRoles'
-import { useRolesStore } from '@/store/useRolesStore'
 import { UserCreateModal } from './UserCreateModal'
 import { UserDeleteModal } from './UserDeleteModal'
 import { UserEditModal } from './UserEditModal'
@@ -57,21 +55,8 @@ export const UserAdminTable = () => {
   const [rowSelection, setRowSelection] = useState({})
   const role = useUserAuthStore((state) => state.user?.role)
   const userId = useUserAuthStore((state) => state.user_id)
-  const { getUsers, getUser, reSendOtp } = useUsers()
-  const { getRoles } = useRoles()
-  const setUsers = useUserStore((state) => state.setUsers)
+  const { getUser, reSendOtp } = useUsers()
   const users = useUserStore((state) => state.users)
-  const setRoles = useRolesStore((state) => state.setRoles)
-
-  const { data: usersData, isLoading: isLoadingUsers } = useQuery({
-    queryKey: ['users'],
-    queryFn: getUsers
-  })
-
-  const { data: roleData, isLoading: isLoadingRoles } = useQuery({
-    queryKey: ['roles'],
-    queryFn: getRoles
-  })
 
   const { mutateAsync: getUserAsync, data: userData } = useMutation({
     mutationKey: ['getUser'],
@@ -182,7 +167,9 @@ export const UserAdminTable = () => {
           <Button
             variant='ghost'
             size='icon'
-            className={`${!!row.original.valid && 'hidden'} ${sendMail || (isPendingReSendOtp && 'cursor-not-allowed')}`}
+            className={`${!!row.original.valid && 'hidden'} ${
+              sendMail || (isPendingReSendOtp && 'cursor-not-allowed')
+            }`}
             disabled={sendMail || isPendingReSendOtp}
             onClick={async () => {
               const { id, names, lastnames, email } = row.original
@@ -215,7 +202,10 @@ export const UserAdminTable = () => {
             variant='ghost'
             size='icon'
             disabled={row.original.id === userId || role?.includes('user')}
-            className={`${row.original.id === userId || (role?.includes('user') && 'opacity-50 cursor-not-allowed')} `}
+            className={`${
+              row.original.id === userId ||
+              (role?.includes('user') && 'opacity-50 cursor-not-allowed')
+            } `}
             onClick={() => {
               setIdUser(row.original.id)
               setDeleteOpen(true)
@@ -232,7 +222,7 @@ export const UserAdminTable = () => {
 
   // Tabla de usuarios
   const table = useReactTable({
-    data: users,
+    data: users || [],
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -249,14 +239,6 @@ export const UserAdminTable = () => {
       rowSelection
     }
   })
-
-  useEffect(() => {
-    if (usersData) setUsers(usersData)
-  }, [isLoadingUsers, usersData, setUsers])
-
-  useEffect(() => {
-    if (roleData) setRoles(roleData)
-  }, [isLoadingRoles, roleData, setRoles])
 
   return (
     <div className='w-[99vw] pt-[2.5rem] px-[2rem] xs:py-[5rem] flex flex-col items-center'>

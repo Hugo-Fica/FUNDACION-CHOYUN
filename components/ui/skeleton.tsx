@@ -1,5 +1,4 @@
 import { cn } from '@/utils/calculate'
-
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div

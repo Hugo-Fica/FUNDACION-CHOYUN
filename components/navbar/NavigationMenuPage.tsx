@@ -69,7 +69,7 @@ export function NavigationMenuPage() {
               <NavigationMenuTrigger className='md:text-base text-xs'>
                 {link.title}
               </NavigationMenuTrigger>
-              <NavigationMenuContent className=''>
+              <NavigationMenuContent className='z-[11]'>
                 <ul className='grid  gap-3 p-4 md:w-[385px] grid-cols-1 lg:w-[390px] transition-all'>
                   {link.subLinks.map((sub) => (
                     <ListItem

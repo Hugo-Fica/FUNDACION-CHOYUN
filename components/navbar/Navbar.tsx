@@ -16,7 +16,7 @@ const links: LinkType[] = [
   { path: '/en-linea', text: 'Conecta' },
   { path: '/prensa', text: 'Prensa' },
   { path: '/', text: 'Publicaciones' },
-  { path: '/', text: 'Quiero ayudar' },
+  { path: '/', text: 'Quiero ayudar' }
 ]
 
 export const Navbar = () => {
@@ -45,7 +45,10 @@ export const Navbar = () => {
   return (
     <nav className='bg-white px-2 sm:px-4 lg:px-12 fixed top-0 w-full z-10 shadow-md'>
       <div className='flex items-center justify-between h-16'>
-        <Link href={'/'} className='flex items-center' legacyBehavior>
+        <Link
+          href={'/'}
+          className='flex items-center'
+          legacyBehavior>
           <a>
             <Image
               className='w-auto pb-[10px]'
@@ -59,84 +62,104 @@ export const Navbar = () => {
         <div className='flex space-x-2 lg:hidden'>
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className='text-black hover:text-gray-700 focus:outline-none focus:text-gray-700'
-          >
+            className='text-black hover:text-gray-700 focus:outline-none focus:text-gray-700'>
             <FaBars size={24} />
           </button>
         </div>
         <div className={`hidden lg:flex lg:items-center lg:space-x-4`}>
           {links.map((link: LinkType) => (
-            <Link href={link.path} key={link.text} legacyBehavior>
-              <a className='text-black hover:text-gray-700 text-sm lg:text-base'>
-                {link.text}
-              </a>
+            <Link
+              href={link.path}
+              key={link.text}
+              legacyBehavior>
+              <a className='text-black hover:text-gray-700 text-sm lg:text-base'>{link.text}</a>
             </Link>
           ))}
           <div className='flex items-center'>
-            <SearchIcon size={20} className='fill-black mx-2' />
+            <SearchIcon
+              size={20}
+              className='fill-black mx-2'
+            />
           </div>
           <Link
             href={'/inicio-sesion'}
             className='flex items-center'
-            legacyBehavior
-          >
+            legacyBehavior>
             <a>
-              <PersonIcon size={20} className='fill-black' />
+              <PersonIcon
+                size={20}
+                className='fill-black'
+              />
             </a>
           </Link>
           <div className='flex space-x-2 ml-2'>
             <Link
               href='https://web.facebook.com/fundacionchoyun?locale=es_LA'
               aria-label='Facebook'
-              legacyBehavior
-            >
+              legacyBehavior>
               <a>
-                <FaFacebook size={20} className='text-black' />
+                <FaFacebook
+                  size={20}
+                  className='text-black'
+                />
               </a>
             </Link>
             <Link
               href='https://www.youtube.com/@fundacionchoyun6663'
               aria-label='YouTube'
-              legacyBehavior
-            >
+              legacyBehavior>
               <a>
-                <FaYoutube size={20} className='text-black' />
+                <FaYoutube
+                  size={20}
+                  className='text-black'
+                />
               </a>
             </Link>
             <Link
               href='https://www.instagram.com/fundacion.choyun/?hl=es'
               aria-label='Instagram'
-              legacyBehavior
-            >
+              legacyBehavior>
               <a>
-                <FaInstagram size={20} className='text-black' />
+                <FaInstagram
+                  size={20}
+                  className='text-black'
+                />
               </a>
             </Link>
           </div>
         </div>
       </div>
       {isOpen && (
-        <div ref={menuRef} className='lg:hidden'>
+        <div
+          ref={menuRef}
+          className='lg:hidden'>
           <div className='flex flex-col space-y-1 px-2 pt-2 pb-3'>
             {links.map((link: LinkType) => (
-              <Link href={link.path} key={link.text} legacyBehavior>
+              <Link
+                href={link.path}
+                key={link.text}
+                legacyBehavior>
                 <a
                   onClick={handleLinkClick}
-                  className='text-black hover:text-gray-700 text-sm'
-                >
+                  className='text-black hover:text-gray-700 text-sm'>
                   {link.text}
                 </a>
               </Link>
             ))}
             <div className='flex items-center justify-between mt-2'>
-              <SearchIcon size={20} className='fill-black mx-2' />
+              <SearchIcon
+                size={20}
+                className='fill-black mx-2'
+              />
               <Link
                 href={'/inicio-sesion'}
                 className='flex items-center'
-                legacyBehavior
-              >
+                legacyBehavior>
                 <a onClick={handleLinkClick}>
-                  <PersonIcon size={20} className='fill-black' />
+                  <PersonIcon
+                    size={20}
+                    className='fill-black'
+                  />
                 </a>
               </Link>
             </div>
@@ -144,28 +167,34 @@ export const Navbar = () => {
               <Link
                 href='https://web.facebook.com/fundacionchoyun?locale=es_LA'
                 aria-label='Facebook'
-                legacyBehavior
-              >
+                legacyBehavior>
                 <a onClick={handleLinkClick}>
-                  <FaFacebook size={20} className='text-black' />
+                  <FaFacebook
+                    size={20}
+                    className='text-black'
+                  />
                 </a>
               </Link>
               <Link
                 href='https://www.youtube.com/@fundacionchoyun6663'
                 aria-label='YouTube'
-                legacyBehavior
-              >
+                legacyBehavior>
                 <a onClick={handleLinkClick}>
-                  <FaYoutube size={20} className='text-black' />
+                  <FaYoutube
+                    size={20}
+                    className='text-black'
+                  />
                 </a>
               </Link>
               <Link
                 href='https://www.instagram.com/fundacion.choyun/?hl=es'
                 aria-label='Instagram'
-                legacyBehavior
-              >
+                legacyBehavior>
                 <a onClick={handleLinkClick}>
-                  <FaInstagram size={20} className='text-black' />
+                  <FaInstagram
+                    size={20}
+                    className='text-black'
+                  />
                 </a>
               </Link>
             </div>

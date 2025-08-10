@@ -57,7 +57,7 @@ export const ButtonUser = () => {
                 />
               </svg>
             </NavigationMenuTrigger>
-            <NavigationMenuContent>
+            <NavigationMenuContent className='z-[100]'>
               <ul className='grid w-[250px] gap-3 p-4 md:w-[310px] grid-cols-1 lg:w-[350px] transition-all'>
                 {user !== null ? (
                   <>
