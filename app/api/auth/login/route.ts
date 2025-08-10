@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       )
     }
     const emailString = String(email).trim().toLocaleLowerCase()
-    const usuario = await prisma.users.findFirst({ where: { email:emailString  } })
+    const usuario = await prisma.users.findFirst({ where: { email: emailString } })
     if (!usuario)
       return NextResponse.json({ message: 'El correo electrónico no existe' }, { status: 400 })
     if (!usuario.password)

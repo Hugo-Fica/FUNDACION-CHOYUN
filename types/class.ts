@@ -18,6 +18,20 @@ export type CreateClassRequest = {
   schedules?: string[]
   duration: number
   color: string
+  fechaInicioClase: string
+}
+export type TClass = {
+  id: string
+  name: string
+  description: string
+  color: string
+  duration: number
+  fechaInicioClase: Date
+  schedules: string[]
+  studentUsers: TUserClass[]
+  teacherUsers: TUserClass[]
+  students: number
+  teachers: number
 }
 
 export type UpdateClassRequest = {
@@ -26,8 +40,13 @@ export type UpdateClassRequest = {
   scheduleIds?: string[]
   color?: string
   duration?: number
+  fechaInicioClase?: string
 }
-
+export type TUserClass = {
+  id: string
+  email: string
+  names: string
+}
 export type ClassAPI = {
   id: string
   name: string
@@ -35,6 +54,7 @@ export type ClassAPI = {
   color: string
   duration: number
   schedules: ScheduleAPI[]
-  teacherUsers: any[]
-  studentUsers: any[]
+  teacherUsers: TUserClass[]
+  studentUsers: TUserClass[]
+  fechaInicioClase: string
 }

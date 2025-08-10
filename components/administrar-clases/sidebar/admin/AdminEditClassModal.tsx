@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/utils/calculate'
-import { Loader2, X } from 'lucide-react'
+import { CalendarIcon, Loader2, X } from 'lucide-react'
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
 import { AdminAddScheduleModal } from './AdminAddScheduleModal'
 import {
@@ -38,14 +38,17 @@ import { z } from 'zod'
 import { toast } from 'sonner'
 import { useScheduleStore } from '@/store/useScheduleStore'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { CreateClassRequest } from '@/types/class'
+import { TClass } from '@/types/class'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
+import { AdminAddTeacherAndStudent } from './AdminAddTeacherAndStudent'
+import { parseDate } from 'chrono-node'
+import { Calendar } from '@/components/ui/calendar'
 
 type Props = {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
   classId: string
-  classEdit: CreateClassRequest | null
+  classEdit: TClass | null
 }
 
 const formSchema = z.object({
@@ -55,15 +58,32 @@ const formSchema = z.object({
     .array(z.string())
     .min(1, { message: 'Debe seleccionar al menos una hora de clase' }),
   duration: z.number().min(0, { message: 'La duración de la clase es obligatoria' }),
-  color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' })
+  color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' }),
+  fechaInicioClase: z.date({
+    required_error: 'Debe seleccionar una fecha de inicio de la clase'
+  })
 })
 
+function formatDate(date: Date | undefined) {
+  if (!date) {
+    return ''
+  }
+  return date.toLocaleDateString('es-CL', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })
+}
 export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props) => {
   const queryClient = useQueryClient()
   const { schedules } = useScheduleStore((state) => state)
   const [openPopover, setOpenPopover] = useState(false)
   const [selectedValues, setSelectedValues] = useState<string[]>([])
   const { putClass } = useScheduleClass()
+  const [open2, setOpen2] = useState(false)
+  const [value, setValue] = useState('')
+  const [date, setDate] = useState<Date | undefined>(parseDate(value) || undefined)
+  const [month, setMonth] = useState<Date | undefined>(date)
   const selectedSchedules = schedules?.filter((item) => selectedValues.includes(item.id))
   const handleModal = () => {
     setOpen(!open)
@@ -94,7 +114,8 @@ export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props
         description: values.description,
         scheduleIds: values.scheduleIds,
         duration: values.duration,
-        color: values.color
+        color: values.color,
+        fechaInicioClase: values.fechaInicioClase.toISOString()
       }
     })
     if (isPosted) {
@@ -106,6 +127,7 @@ export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props
       toast.error('Error al crear la clase')
     }
   }
+
   useEffect(() => {
     if (!classEdit) return
     form.setValue('name', classEdit.name)
@@ -113,6 +135,9 @@ export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props
     form.setValue('duration', classEdit.duration)
     form.setValue('color', classEdit.color)
     form.setValue('scheduleIds', classEdit.schedules || [])
+    form.setValue('fechaInicioClase', new Date(classEdit.fechaInicioClase))
+    setValue(formatDate(new Date(classEdit.fechaInicioClase)))
+    setDate(new Date(classEdit.fechaInicioClase))
     setSelectedValues(classEdit.schedules || [])
   }, [classEdit, form])
   return (
@@ -157,6 +182,76 @@ export const AdminEditClassModal = ({ open, setOpen, classId, classEdit }: Props
                           {...field}
                           placeholder='Descripción de la clase'
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <AdminAddTeacherAndStudent
+                  sidebarState={true}
+                  classId={classId}
+                />
+                <FormField
+                  control={form.control}
+                  name='fechaInicioClase'
+                  render={({ field }) => (
+                    <FormItem className='col-span-1 '>
+                      <FormLabel>Inicio de clase</FormLabel>
+                      <FormControl>
+                        <div className='flex flex-col gap-3'>
+                          <div className='relative flex gap-2'>
+                            <Input
+                              id='date'
+                              value={value}
+                              placeholder='dd/mm/aaaa'
+                              className='bg-background pr-10'
+                              onChange={(e) => {
+                                setValue(e.target.value)
+                                const date = parseDate(e.target.value)
+                                if (date) {
+                                  setDate(date)
+                                  setMonth(date)
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                  e.preventDefault()
+                                  setOpen2(true)
+                                }
+                              }}
+                            />
+                            <Popover
+                              open={open2}
+                              onOpenChange={setOpen2}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id='date-picker'
+                                  variant='ghost'
+                                  className='absolute top-1/2 right-2 size-6 -translate-y-1/2'>
+                                  <CalendarIcon className='size-3.5' />
+                                  <span className='sr-only'>Seleccionar fecha</span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className='w-auto overflow-hidden p-0'
+                                align='end'>
+                                <Calendar
+                                  mode='single'
+                                  selected={date}
+                                  captionLayout='dropdown'
+                                  month={month}
+                                  onMonthChange={setMonth}
+                                  onSelect={(date) => {
+                                    field.onChange(date)
+                                    setDate(date)
+                                    setValue(formatDate(date))
+                                    setOpen2(false)
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -31,7 +31,7 @@ export const OtpUser = ({ user, timeExpires, code, token }: Props) => {
     process.env.NODE_ENV === 'production'
       ? 'https://www.fundacionchoyun.cl'
       : 'http://localhost:3000'
-  }/public/assets/logo_choyun-1.png`
+  }/logo_choyun-1.png`
   return (
     <Html>
       <Head />

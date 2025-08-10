@@ -41,6 +41,7 @@ model Class {
   description  String?
   color        String
   duration     Int
+  fechaInicioClase DateTime
   // Relación explícita para horarios (many-to-many)
   scheduleIds String[] @db.ObjectId
   schedules   Schedule[] @relation(fields: [scheduleIds], references: [id])
