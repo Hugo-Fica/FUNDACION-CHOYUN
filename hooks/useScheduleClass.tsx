@@ -1,6 +1,6 @@
 import { CreateScheduleRequest, ScheduleMongo } from '@/types/schedule'
 import axios, { AxiosError } from 'axios'
-import { ClassAPI, CreateClassRequest, UpdateClassRequest } from '../types/class'
+import { ClassAPI, CreateClassRequest, TClass, UpdateClassRequest } from '../types/class'
 import { StudentsTeachersClass } from '../types/schedule'
 
 export const useScheduleClass = () => {
@@ -72,7 +72,7 @@ export const useScheduleClass = () => {
   const getClassById = async (classId: string) => {
     try {
       const { data } = await axios.get(`/api/protected/class/${classId}`)
-      return { editClass: data as CreateClassRequest }
+      return { editClass: data as TClass }
     } catch (error) {
       const err = error as AxiosError<{ message: string }>
       if (err.response && err.response.data && err.response.data.message) {

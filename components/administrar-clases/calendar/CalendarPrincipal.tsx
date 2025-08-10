@@ -23,6 +23,8 @@ import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { useQuery } from '@tanstack/react-query'
 import { useScheduleStore } from '@/store/useScheduleStore'
 import { useViewClassCalendar } from '@/hooks/useViewClassCalendar'
+import { ClassAPI } from '@/types/class'
+import { EventoCalendar } from '@/types/calendar'
 
 const locales = {
   es: es
@@ -35,7 +37,7 @@ export const CalendarPrincipal = () => {
   const [view, setView] = useState<View>(Views.MONTH)
   const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false)
   const { getClass, getScheduleClass } = useScheduleClass()
-  const { setSchedules, setClasses, classes, schedules } = useScheduleStore((state) => state)
+  const { setSchedules, setClasses, classes } = useScheduleStore((state) => state)
 
   const { data: dataClass, isPending: isPendingClass } = useQuery({
     queryKey: ['getClass'],
@@ -52,12 +54,14 @@ export const CalendarPrincipal = () => {
     }
   }, [dataSchedules, isPendingSchedules, setSchedules])
 
-  const { events: e } = useViewClassCalendar(schedules)
+  const { events: e } = useViewClassCalendar(classes)
+
   useEffect(() => {
     if (dataClass?.data) {
       setClasses(dataClass.data)
     }
   }, [dataClass, isPendingClass, setClasses])
+
   return (
     <SidebarProvider className='md:min-h-[95%]'>
       <SidebarInset className='p-10'>
@@ -76,6 +80,11 @@ export const CalendarPrincipal = () => {
               <DnDCalendar
                 localizer={localizer}
                 events={e}
+                eventPropGetter={(event) => ({
+                  style: {
+                    backgroundColor: (event as EventoCalendar).backgroudColor
+                  }
+                })}
                 // startAccessor='start'
                 // endAccessor='end'
                 style={{ height: '45rem' }}

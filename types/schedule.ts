@@ -1,4 +1,4 @@
-import { ClassAPI } from './class'
+import { ClassAPI, TUserClass } from './class'
 import { BaseModel } from './global'
 import { StudentInClassMongo } from './student'
 
@@ -38,8 +38,8 @@ export type StudentsTeachersClass = {
   color: string
   duration: number
   schedules: string[]
-  studentUsers: string[]
-  teacherUsers: string[]
+  studentUsers: TUserClass[]
+  teacherUsers: TUserClass[]
 }
 
 export type ScheduleStore = {

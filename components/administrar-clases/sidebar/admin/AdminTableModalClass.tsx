@@ -29,12 +29,13 @@ import {
   getPaginationRowModel,
   useReactTable
 } from '@tanstack/react-table'
-import { Pencil, Table2, Trash } from 'lucide-react'
+import { Loader2, Pencil, Table2, Trash } from 'lucide-react'
 import { useState } from 'react'
 import { AdminEditClassModal } from './AdminEditClassModal'
 import { AdminDeleteClassModal } from './AdminDeleteClassModal'
 import { useMutation } from '@tanstack/react-query'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
+import { AdminViewEmailTemplate } from './AdminViewEmailTemplate'
 
 type Props = {
   sidebarState: boolean
@@ -62,7 +63,6 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
     mutationKey: ['getClassById'],
     mutationFn: getClassById
   })
-
   const columns: ColumnDef<ClassAPI>[] = [
     {
       accessorKey: 'name',
@@ -75,6 +75,17 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
       cell: ({ row }) => <div className='capitalize pl-4'>{row.getValue('description')}</div>
     },
     {
+      accessorKey: 'students',
+      header: 'Alumnos',
+      cell: ({ row }) => <div className='capitalize pl-4'>{row.getValue('students')}</div>
+    },
+    {
+      accessorKey: 'teachers',
+      header: 'Profesores',
+      cell: ({ row }) => <div className='capitalize pl-4'>{row.getValue('teachers')}</div>
+    },
+
+    {
       accessorKey: 'actions',
       header: 'Acciones',
       cell: ({ row }) => (
@@ -86,11 +97,17 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
               setClassId(row.original.id)
               setEditOpen(true)
             }}>
-            <Pencil
-              size={16}
-              className='text-yellow-600'
-            />
+            {isPendingClass ? (
+              <Loader2 className='animate-spin text-yellow-600' />
+            ) : (
+              <Pencil
+                size={16}
+                className='text-yellow-600'
+              />
+            )}
           </Button>
+          <AdminViewEmailTemplate classId={row.original.id} />
+
           <Button
             variant='ghost'
             onClick={() => {
@@ -135,7 +152,7 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
             )}
           </Button>
         </DialogTrigger>
-        <DialogContent className='max-w-2xl max-h-[90vh] overflow-y-auto'>
+        <DialogContent className='max-w-5xl max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>Ver clases</DialogTitle>
             <DialogDescription>
@@ -144,9 +161,9 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
           </DialogHeader>
           <div>
             <ScrollArea className='w-full mx-auto h-[25rem] relative'>
-              <div className='w-full flex justify-center'>
-                <div className='w-max h-max rounded-md border'>
-                  <Table>
+              <div className='flex justify-center'>
+                <div className='w-full h-max rounded-md border'>
+                  <Table className=''>
                     <TableHeader>
                       {table.getHeaderGroups().map((headerGroup) => (
                         <TableRow key={headerGroup.id}>

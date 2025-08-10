@@ -12,14 +12,17 @@ export async function GET(req: NextRequest) {
         color: true,
         duration: true,
         schedules: { select: { id: true, name: true, day: true, startTime: true, endTime: true } },
-        teacherUsers: { select: { teacher: { select: { id: true } } } },
-        studentUsers: { select: { student: { select: { id: true } } } }
+        teacherUsers: { select: { teacher: { select: { id: true, email: true, names: true } } } },
+        studentUsers: { select: { student: { select: { id: true, email: true, names: true } } } },
+        fechaInicioClase: true
       }
     })
     const classChoyun = classes.map((item) => ({
       ...item,
-      teacherUsers: item.teacherUsers.map((t) => t.teacher),
-      studentUsers: item.studentUsers.map((s) => s.student)
+      students: item.studentUsers.length,
+      teachers: item.teacherUsers.length,
+      teacherUsers: item.teacherUsers.map((t) => ({ id: t.teacher.id, email: t.teacher.email })),
+      studentUsers: item.studentUsers.map((s) => ({ id: s.student.id, email: s.student.email }))
     }))
     return NextResponse.json({ classChoyun: classChoyun }, { status: 200 })
   } catch (error) {
@@ -30,7 +33,14 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body: CreateClassRequest = await req.json()
-    const { name, description, schedules: scheduleIds = [], duration, color } = body
+    const {
+      name,
+      description,
+      schedules: scheduleIds = [],
+      duration,
+      color,
+      fechaInicioClase
+    } = body
     if (!name) {
       return NextResponse.json(
         { message: 'Error no se proporciono el nombre de la clase' },
@@ -56,7 +66,8 @@ export async function POST(req: NextRequest) {
         description,
         scheduleIds,
         duration,
-        color
+        color,
+        fechaInicioClase
       }
     })
 

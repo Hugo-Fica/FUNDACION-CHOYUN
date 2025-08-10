@@ -41,13 +41,14 @@ import { cn } from '@/utils/calculate'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { Loader2, Users, X } from 'lucide-react'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
 type Props = {
   sidebarState: boolean
+  classId?: string
 }
 
 const formSchema = z.object({
@@ -56,7 +57,7 @@ const formSchema = z.object({
   studentsIds: z.array(z.string()).min(1, { message: 'Debe seleccionar al menos un alumn@' })
 })
 
-export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
+export const AdminAddTeacherAndStudent = ({ sidebarState, classId }: Props) => {
   const role = useUserAuthStore((state) => state.user?.role)
   const classes = useScheduleStore((state) => state.classes)
   const users = useUserStore((state) => state.users)
@@ -132,6 +133,39 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
     }
     handleModal()
   }
+
+  const getStudentsTeachersInClass = useCallback(
+    async (id: string) => {
+      const { userClass } = await getStudentsTeachersClassAsync(id)
+      if (userClass && userClass?.studentUsers) {
+        setSelectedStudent(userClass?.studentUsers.map((item) => item.id))
+        form.setValue(
+          'studentsIds',
+          userClass?.studentUsers.map((item) => item.id)
+        )
+      } else {
+        setSelectedStudent([])
+      }
+      if (userClass && userClass?.teacherUsers) {
+        setSelectedTeacher(userClass?.teacherUsers.map((item) => item.id))
+        form.setValue(
+          'teacherIds',
+          userClass?.teacherUsers.map((item) => item.id)
+        )
+      } else {
+        setSelectedTeacher([])
+      }
+    },
+    [form, getStudentsTeachersClassAsync]
+  )
+  useEffect(() => {
+    if (!classId || !open) return
+    form.setValue('classId', classId)
+    form.setValue('studentsIds', [])
+    form.setValue('teacherIds', [])
+    setSelectedTeacher([])
+    getStudentsTeachersInClass(classId)
+  }, [open, form, classId, getStudentsTeachersInClass])
   return (
     <>
       <Dialog
@@ -180,25 +214,27 @@ export const AdminAddTeacherAndStudent = ({ sidebarState }: Props) => {
                             setSelectedTeacher([])
                             const { userClass } = await getStudentsTeachersClassAsync(value)
                             if (userClass && userClass?.studentUsers) {
-                              setSelectedStudent(userClass?.studentUsers.map((item) => item))
+                              setSelectedStudent(userClass?.studentUsers.map((item) => item.id))
                               form.setValue(
                                 'studentsIds',
-                                userClass?.studentUsers.map((item) => item)
+                                userClass?.studentUsers.map((item) => item.id)
                               )
                             } else {
                               setSelectedStudent([])
                             }
                             if (userClass && userClass?.teacherUsers) {
-                              setSelectedTeacher(userClass?.teacherUsers.map((item) => item))
+                              setSelectedTeacher(userClass?.teacherUsers.map((item) => item.id))
                               form.setValue(
                                 'teacherIds',
-                                userClass?.teacherUsers.map((item) => item)
+                                userClass?.teacherUsers.map((item) => item.id)
                               )
                             } else {
                               setSelectedTeacher([])
                             }
                           }}>
-                          <SelectTrigger className='w-full'>
+                          <SelectTrigger
+                            className='w-full'
+                            disabled={!!classId}>
                             <SelectValue placeholder='Selecciona una clase' />
                           </SelectTrigger>
                           <SelectContent className='max-h-[15rem]'>

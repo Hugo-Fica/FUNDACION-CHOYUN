@@ -35,13 +35,15 @@ import { useScheduleStore } from '@/store/useScheduleStore'
 import { cn } from '@/utils/calculate'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Loader2, NotebookPen, X } from 'lucide-react'
+import { CalendarIcon, Loader2, NotebookPen, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { AdminAddScheduleModal } from './AdminAddScheduleModal'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { toast } from 'sonner'
+import { Calendar } from '@/components/ui/calendar'
+import { parseDate } from 'chrono-node'
 
 const formSchema = z.object({
   name: z.string().min(5, { message: 'El nombre de la clase es obligatorio' }),
@@ -50,12 +52,27 @@ const formSchema = z.object({
     .array(z.string())
     .min(1, { message: 'Debe seleccionar al menos una hora de clase' }),
   duration: z.number().min(0, { message: 'La duración de la clase es obligatoria' }),
-  color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' })
+  color: z.string().min(1, { message: 'Debe seleccionar un color para la clase' }),
+  fechaInicioClase: z.date({
+    required_error: 'Debe seleccionar una fecha de inicio de la clase'
+  })
 })
+
+function formatDate(date: Date | undefined) {
+  if (!date) {
+    return ''
+  }
+  return date.toLocaleDateString('es-CL', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })
+}
 
 type Props = {
   sidebarState: boolean
 }
+
 export const AdminAddClassModal = ({ sidebarState }: Props) => {
   const role = useUserAuthStore((state) => state.user?.role)
   const { schedules } = useScheduleStore((state) => state)
@@ -64,7 +81,10 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
   const [open, setOpen] = useState(false)
   const [openPopover, setOpenPopover] = useState(false)
   const [selectedValues, setSelectedValues] = useState<string[]>([])
-
+  const [open2, setOpen2] = useState(false)
+  const [value, setValue] = useState('')
+  const [date, setDate] = useState<Date | undefined>(parseDate(value) || undefined)
+  const [month, setMonth] = useState<Date | undefined>(date)
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -72,7 +92,8 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
       description: '',
       scheduleIds: [],
       duration: undefined,
-      color: ''
+      color: '',
+      fechaInicioClase: undefined
     }
   })
 
@@ -93,6 +114,7 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
     setOpen(!open)
     form.reset()
     setSelectedValues([])
+    setValue('')
   }
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     const isPosted = await postClassAsync({
@@ -100,7 +122,8 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
       description: values.description,
       schedules: values.scheduleIds,
       duration: values.duration,
-      color: values.color
+      color: values.color,
+      fechaInicioClase: values.fechaInicioClase.toISOString() // <- convertir a string ISO
     })
 
     if (isPosted) {
@@ -350,6 +373,72 @@ export const AdminAddClassModal = ({ sidebarState }: Props) => {
                           {...field}
                           placeholder='Duración en semanas'
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='fechaInicioClase'
+                  render={({ field }) => (
+                    <FormItem className='col-span-1 '>
+                      <FormLabel>Inicio de clase</FormLabel>
+                      <FormControl>
+                        <div className='flex flex-col gap-3'>
+                          <div className='relative flex gap-2'>
+                            <Input
+                              id='date'
+                              value={value}
+                              placeholder='dd/mm/aaaa'
+                              className='bg-background pr-10'
+                              onChange={(e) => {
+                                setValue(e.target.value)
+                                const date = parseDate(e.target.value)
+                                if (date) {
+                                  setDate(date)
+                                  setMonth(date)
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'ArrowDown') {
+                                  e.preventDefault()
+                                  setOpen2(true)
+                                }
+                              }}
+                            />
+                            <Popover
+                              open={open2}
+                              onOpenChange={setOpen2}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  id='date-picker'
+                                  variant='ghost'
+                                  className='absolute top-1/2 right-2 size-6 -translate-y-1/2'>
+                                  <CalendarIcon className='size-3.5' />
+                                  <span className='sr-only'>Seleccionar fecha</span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className='w-auto overflow-hidden p-0'
+                                align='end'>
+                                <Calendar
+                                  mode='single'
+                                  selected={date}
+                                  captionLayout='dropdown'
+                                  month={month}
+                                  onMonthChange={setMonth}
+                                  onSelect={(date) => {
+                                    field.onChange(date)
+                                    setDate(date)
+                                    setValue(formatDate(date))
+                                    setOpen2(false)
+                                  }}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

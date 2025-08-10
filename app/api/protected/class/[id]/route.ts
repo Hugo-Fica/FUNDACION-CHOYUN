@@ -14,24 +14,34 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
         description: true,
         color: true,
         duration: true,
+        fechaInicioClase: true,
         schedules: { select: { id: true } },
-        studentUsers: { select: { studentId: true } },
-        teacherUsers: { select: { teacherId: true } }
+        studentUsers: { select: { student: { select: { id: true, email: true, names: true } } } },
+        teacherUsers: { select: { teacher: { select: { id: true, email: true, names: true } } } }
       }
     })
-
     if (!classData) {
       return NextResponse.json({ error: 'No se encontró la clase' }, { status: 404 })
     }
+
     const respClass = {
       ...classData,
       schedules: classData.schedules.map((item) => item.id),
-      studentUsers: classData.studentUsers.map((item) => item.studentId),
-      teacherUsers: classData.teacherUsers.map((item) => item.teacherId)
+      studentUsers: classData.studentUsers.map((item) => ({
+        id: item.student.id,
+        email: item.student.email,
+        names: item.student.names?.toLocaleUpperCase()
+      })),
+      teacherUsers: classData.teacherUsers.map((item) => ({
+        id: item.teacher.id,
+        email: item.teacher.email,
+        names: item.teacher.names?.toLocaleUpperCase()
+      })),
+      students: classData.studentUsers.length,
+      teachers: classData.teacherUsers.length
     }
     return NextResponse.json(respClass)
   } catch (error) {
-    console.error('Error fetching class:', error)
     return NextResponse.json(
       { error: 'Error fetching class', details: (error as Error).message },
       { status: 500 }
@@ -44,7 +54,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
   try {
     const { id } = params
     const body: UpdateClassRequest = await request.json()
-    const { name, description, scheduleIds, color, duration } = body
+    const { name, description, scheduleIds, color, duration, fechaInicioClase } = body
 
     const existingClass = await prisma.class.findUnique({
       where: { id },
@@ -62,6 +72,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
     if (description !== undefined) updateData.description = description
     if (color !== undefined) updateData.color = color
     if (duration !== undefined) updateData.duration = duration
+    if (fechaInicioClase !== undefined) updateData.fechaInicioClase = fechaInicioClase
 
     // Si se proporcionan nuevos horarios
     if (scheduleIds) {
@@ -135,7 +146,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
     // Si no se actualiza la clase, retorna un mensaje de error
     return NextResponse.json({ message: 'Error al actualizar la clase' }, { status: 500 })
   } catch (error) {
-    console.error('Error updating class:', error)
     return NextResponse.json(
       { error: 'Error updating class', details: (error as Error).message },
       { status: 500 }
