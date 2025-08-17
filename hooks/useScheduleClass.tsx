@@ -227,9 +227,14 @@ export const useScheduleClass = () => {
     }
   }
   const getClassByUserId = async (userId: string) => {
-    const { data } = await axios.get(`/api/protected/class/user/${userId}`)
+    try {
+      const { data } = await axios.get(`/api/protected/class/user/${userId}`)
 
-    return data as ClassUserAPI[]
+      return data as ClassUserAPI[]
+    } catch (error) {
+      console.log(error)
+      return null
+    }
   }
   return {
     getScheduleClass,
