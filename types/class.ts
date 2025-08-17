@@ -58,3 +58,21 @@ export type ClassAPI = {
   studentUsers: TUserClass[]
   fechaInicioClase: string
 }
+
+export type ClassUserAPI = {
+  id: string
+  name: string
+  description: string
+  color: string
+  duration: number
+  fechaInicioClase: Date
+  schedules: ScheduleAPI[]
+  studentUsers: Users
+  teacherUsers: Users
+}
+export type Users = {
+  id?: string
+  email?: string
+  names?: string
+  view: boolean
+}

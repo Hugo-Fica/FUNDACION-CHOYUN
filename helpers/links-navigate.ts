@@ -51,7 +51,12 @@ export const linksNavigateAuth: LinkTypeAuth[] = [
     url: '/auth/administrar-clases',
     auth: ['sup_admin', 'admin']
   },
-  { title: 'Volver al inicio', url: '/', auth: ['user'] }
+  { title: 'Volver al inicio', url: '/', auth: ['sup_admin', 'admin', 'user'] },
+  {
+    title: 'Mis acciones',
+    url: '/auth/mis-acciones',
+    auth: ['user']
+  }
 ]
 export const publicRoutes = [
   'inicio-sesion',

@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
 export async function PUT(req: NextRequest) {
   try {
     const { id, email, names, lastnames, phone, role, age, birthday } = await req.json()
+
     if (!id) {
       return NextResponse.json(
         { message: 'Error no se proporciono el id del usuario' },

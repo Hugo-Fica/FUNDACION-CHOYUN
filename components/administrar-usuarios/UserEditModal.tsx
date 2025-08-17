@@ -14,9 +14,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '../ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
-import { calcularEdad, cn } from '@/utils/calculate'
-import { CalendarIcon, Loader2 } from 'lucide-react'
-import { DatePicker } from '../DatePicker'
+import { ChevronDownIcon, Loader2 } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -31,12 +29,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { User } from '@/types/user'
 import { useUsers } from '@/hooks/useUsers'
 import { toast } from 'sonner'
-import dayjs from 'dayjs'
-import 'dayjs/locale/es' // idioma español
-import localizedFormat from 'dayjs/plugin/localizedFormat'
-
-dayjs.extend(localizedFormat)
-dayjs.locale('es')
+import { Calendar } from '../ui/calendar'
 
 const formSchema = z.object({
   names: z.string().min(6, { message: 'Los nombres son obligatorios' }),
@@ -102,7 +95,7 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
     form.setValue('phone', user.phone)
     form.setValue('role', roles.find((r) => r.name === user.role)?.id || '')
     form.setValue('age', user.age)
-    form.setValue('birthday', dayjs(user.birthday).format('D [de] MMMM [de] YYYY'))
+    form.setValue('birthday', user.birthday)
   }, [user, form, roles])
   return (
     <>
@@ -188,30 +181,32 @@ export const UserEditModal = ({ open, setOpen, user, userId }: Props) => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Fecha de nacimiento</FormLabel>
-                      <Popover open={openDatePicker}>
+                      <Popover
+                        open={openDatePicker}
+                        onOpenChange={setOpenDatePicker}>
                         <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={'outline'}
-                              onClick={() => setOpenDatePicker(!openDatePicker)}
-                              className={cn(
-                                'w-full pl-3 text-left font-normal',
-                                !field.value && 'text-muted-foreground'
-                              )}>
-                              {field.value ? field.value : <span>Selecciona una fecha</span>}
-                              <CalendarIcon className='ml-auto h-4 w-4 opacity-50' />
-                            </Button>
-                          </FormControl>
+                          <Button
+                            variant='outline'
+                            id='date'
+                            className='w-48 justify-between font-normal'>
+                            {field.value
+                              ? new Date(field.value).toLocaleDateString()
+                              : 'Select date'}
+                            <ChevronDownIcon />
+                          </Button>
                         </PopoverTrigger>
                         <PopoverContent
-                          className='w-full p-0'
-                          align='center'>
-                          <DatePicker
-                            onChange={(date) => {
-                              field.onChange(date)
-                              form.setValue('age', calcularEdad(date))
+                          className='w-auto overflow-hidden p-0'
+                          align='start'>
+                          <Calendar
+                            mode='single'
+                            selected={new Date(field.value)}
+                            captionLayout='dropdown'
+                            onSelect={(date) => {
+                              if (!date) return
+                              field.onChange(date.toISOString())
+                              setOpenDatePicker(false)
                             }}
-                            setOpenDatePicker={setOpenDatePicker}
                           />
                         </PopoverContent>
                       </Popover>

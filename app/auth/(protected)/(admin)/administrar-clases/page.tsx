@@ -1,5 +1,5 @@
-import { CalendarPrincipal } from '@/components/administrar-clases/calendar/CalendarPrincipal'
+import { CalendarPrincipalAdmin } from '@/components/administrar-clases/calendar/CalendarPrincipalAdmin'
 
 export default function AdministrarClases() {
-  return <CalendarPrincipal />
+  return <CalendarPrincipalAdmin />
 }

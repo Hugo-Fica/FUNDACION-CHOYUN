@@ -1,4 +1,4 @@
-import { ClassAPI, TUserClass } from './class'
+import { ClassAPI, ClassUserAPI, TUserClass } from './class'
 import { BaseModel } from './global'
 import { StudentInClassMongo } from './student'
 
@@ -47,4 +47,6 @@ export type ScheduleStore = {
   setSchedules: (schedules: ScheduleMongo[]) => void
   classes: ClassAPI[] | null
   setClasses: (classes: ClassAPI[]) => void
+  classesUser: ClassUserAPI[] | null
+  setClassesUser: (classes: ClassUserAPI[]) => void
 }
