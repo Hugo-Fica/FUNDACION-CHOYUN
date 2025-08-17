@@ -1,9 +1,11 @@
 import { RouteParams } from '@/types/global'
 import { NextRequest, NextResponse } from 'next/server'
+import prisma from '@/prisma/prisma'
 
 export async function GET(request: NextRequest, { params }: RouteParams): Promise<NextResponse> {
   const { id } = params
-  const classData = await prisma?.class.findMany({
+
+  const classData = await prisma.class.findMany({
     where: {
       OR: [
         { teacherUsers: { some: { teacherId: id } } },
