@@ -14,6 +14,10 @@ export const useScheduleStore = create<ScheduleStore>()(
           classes: null,
           setClasses: (classes) => {
             set({ classes }, false, 'SET_CLASSES')
+          },
+          classesUser: null,
+          setClassesUser: (classesUser) => {
+            set({ classesUser }, false, 'SET_CLASSES_USER')
           }
         }
       },

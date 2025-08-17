@@ -10,11 +10,25 @@ export type EventoCalendar = {
   start: Date
   end: Date
   allDay: boolean
-  backgroudColor: string
+  backgroundColor: string
   extendedProps: {
     classId: string
     teacherId: string[]
     studentId: string[]
+    description: string
+  }
+}
+
+export type EventoCalendarUser = {
+  title: string
+  start: Date
+  end: Date
+  allDay: boolean
+  backgroundColor: string
+  extendedProps: {
+    classId: string
+    teacherId: string | null
+    studentId: string | null
     description: string
   }
 }

@@ -1,6 +1,12 @@
 import { CreateScheduleRequest, ScheduleMongo } from '@/types/schedule'
 import axios, { AxiosError } from 'axios'
-import { ClassAPI, CreateClassRequest, TClass, UpdateClassRequest } from '../types/class'
+import {
+  ClassAPI,
+  ClassUserAPI,
+  CreateClassRequest,
+  TClass,
+  UpdateClassRequest
+} from '../types/class'
 import { StudentsTeachersClass } from '../types/schedule'
 
 export const useScheduleClass = () => {
@@ -220,6 +226,11 @@ export const useScheduleClass = () => {
       }
     }
   }
+  const getClassByUserId = async (userId: string) => {
+    const { data } = await axios.get(`/api/protected/class/user/${userId}`)
+
+    return data as ClassUserAPI[]
+  }
   return {
     getScheduleClass,
     postScheduleClass,
@@ -230,6 +241,7 @@ export const useScheduleClass = () => {
     getStudentsTeachersClass,
     deleteClass,
     getClassById,
-    putClass
+    putClass,
+    getClassByUserId
   }
 }

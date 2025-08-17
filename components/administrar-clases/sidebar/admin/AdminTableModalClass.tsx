@@ -43,7 +43,6 @@ type Props = {
 
 export const AdminTableModalClass = ({ sidebarState }: Props) => {
   const userId = useUserAuthStore((state) => state.user_id)
-  const role = useUserAuthStore((state) => state.user?.role)
   const classes = useScheduleStore((state) => state.classes)
   const { getClassById } = useScheduleClass()
   const [open, setOpen] = useState(false)
@@ -140,8 +139,7 @@ export const AdminTableModalClass = ({ sidebarState }: Props) => {
             className={`${
               sidebarState ? '' : 'border border-black hover:bg-black hover:bg-opacity-5'
             } `}
-            variant='ghost'
-            disabled={role?.includes('user')}>
+            variant='ghost'>
             {sidebarState ? (
               <>
                 <Table2 className='text-black w-4 h-4' />
