@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import weekday from 'dayjs/plugin/weekday'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { ClassUserAPI } from '@/types/class'
-import { EventoCalendarUser } from '@/types/calendar'
+import { ClassAPI } from '@/types/class'
+import { EventoCalendar } from '@/types/calendar'
 
 dayjs.extend(weekday)
 dayjs.extend(customParseFormat)
@@ -18,14 +18,14 @@ const dayNameToIndex: Record<string, number> = {
   Domingo: 6
 }
 
-export const useViewClassCalendar = (data: ClassUserAPI[] | null) => {
-  const [events, setEvents] = useState<EventoCalendarUser[]>([])
+export const useViewClassCalendarAdmin = (data: ClassAPI[] | null) => {
+  const [events, setEvents] = useState<EventoCalendar[]>([])
 
   useEffect(() => {
     if (!data) return
 
     const today = dayjs().startOf('week')
-    const recurrentEvents: EventoCalendarUser[] = []
+    const recurrentEvents: EventoCalendar[] = []
 
     for (const classItem of data) {
       const weekToShow = classItem.duration || 1
@@ -53,8 +53,8 @@ export const useViewClassCalendar = (data: ClassUserAPI[] | null) => {
             backgroundColor: classItem.color,
             extendedProps: {
               classId: classItem.id,
-              teacherId: classItem.teacherUsers.id || null,
-              studentId: classItem.studentUsers.id || null,
+              teacherId: classItem.teacherUsers.map((t) => t.id),
+              studentId: classItem.studentUsers.map((s) => s.id),
               description: classItem.description
             }
           })

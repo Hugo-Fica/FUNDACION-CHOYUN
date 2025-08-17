@@ -13,7 +13,7 @@ import { AdminClassSidebar } from '../sidebar/admin/AdminClassSidebar'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { useQuery } from '@tanstack/react-query'
 import { useScheduleStore } from '@/store/useScheduleStore'
-import { useViewClassCalendar } from '@/hooks/useViewClassCalendar'
+import { useViewClassCalendarAdmin } from '@/hooks/useViewClassCalendarAdmin'
 import { EventoCalendar } from '@/types/calendar'
 
 const DnDCalendar = withDragAndDrop(Calendar)
@@ -39,7 +39,7 @@ export const CalendarPrincipalAdmin = () => {
     }
   }, [dataSchedules, isPendingSchedules, setSchedules])
 
-  const { events: e } = useViewClassCalendar(classes)
+  const { events: e } = useViewClassCalendarAdmin(classes)
 
   useEffect(() => {
     if (dataClass?.data) {

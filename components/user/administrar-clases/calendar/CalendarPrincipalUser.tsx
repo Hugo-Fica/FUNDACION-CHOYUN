@@ -14,7 +14,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useScheduleStore } from '@/store/useScheduleStore'
 import { EventoCalendar } from '@/types/calendar'
 import { useUserAuthStore } from '@/store/userAuthStore'
-import { useViewClassCalendarUser } from '@/hooks/useViewCalendarUser'
+import { useViewClassCalendarUser } from '@/hooks/useViewClassCalendarUser'
 
 const DnDCalendar = withDragAndDrop(Calendar)
 const localizer = dayjsLocalizer(dayjs)
