@@ -49,10 +49,10 @@ export const CalendarPrincipalAdmin = () => {
 
   return (
     <SidebarProvider className='md:min-h-[95%]'>
-      <SidebarInset className='p-10'>
+      <SidebarInset className='p-10 h-screen'>
         {isPendingClass ? (
           isPendingClass && (
-            <div className='flex justify-center items-center h-full'>
+            <div className='flex justify-center items-center h-screen'>
               <Loader2 className='animate-spin ' />
               Cargando...
             </div>
