@@ -35,7 +35,7 @@ export const AdminClassSidebar = () => {
   }, [dataSchedules, isPendingSchedules, setSchedules])
   return (
     <Sidebar
-      className='fixed top-16 h-[87.8%] z-[9]'
+      className='fixed top-16 h-scree z-[9]'
       side='right'
       collapsible='icon'>
       <SidebarHeader className='z-[9]'>

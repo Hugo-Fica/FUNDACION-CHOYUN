@@ -126,11 +126,11 @@ export const ButtonBurger = () => {
               </AccordionTrigger>
               {user !== null ? (
                 <>
-                  <AccordionContent
+                  {/* <AccordionContent
                     className='bg-red-500 hover:bg-red-400 text-white hover:text-white pl-[15px] pt-[15px]'
                     onClick={() => setIsOpenProfile(!isOpenProfile)}>
                     {user.names}
-                  </AccordionContent>
+                  </AccordionContent> */}
                   {linksNavigateAuth
                     .filter((l) => l.auth.includes(user.role))
                     .map((link) => (

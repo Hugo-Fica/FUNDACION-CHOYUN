@@ -61,11 +61,11 @@ export const ButtonUser = () => {
               <ul className='grid w-[250px] gap-3 p-4 md:w-[310px] grid-cols-1 lg:w-[350px] transition-all'>
                 {user !== null ? (
                   <>
-                    <Button
+                    {/* <Button
                       className='bg-red-500 hover:bg-red-400 text-white hover:text-white'
                       onClick={() => setIsOpen(!isOpen)}>
                       {user.names}
-                    </Button>
+                    </Button> */}
                     {linksNavigateAuth
                       .filter((l) => l.auth.includes(user.role))
                       .map((l) => (

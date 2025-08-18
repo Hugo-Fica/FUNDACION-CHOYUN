@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
 import weekday from 'dayjs/plugin/weekday'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
-import { ClassAPI } from '@/types/class'
-import { EventoCalendar } from '@/types/calendar'
+import { ClassUserAPI } from '@/types/class'
+import { EventoCalendarUser } from '@/types/calendar'
 
 dayjs.extend(weekday)
 dayjs.extend(customParseFormat)
@@ -18,21 +18,28 @@ const dayNameToIndex: Record<string, number> = {
   Domingo: 6
 }
 
-export const useViewClassCalendar = (data: ClassAPI[] | null) => {
-  const [events, setEvents] = useState<EventoCalendar[]>([])
+export const useViewClassCalendarUser = (data: ClassUserAPI[] | null) => {
+  const [events, setEvents] = useState<EventoCalendarUser[]>([])
 
   useEffect(() => {
     if (!data) return
 
-    const today = dayjs().startOf('week')
-    const recurrentEvents: EventoCalendar[] = []
+    // ← Only include classes where the *student* can view
+    const classes = data.filter((c) => c?.studentUsers?.view === true)
 
-    for (const classItem of data) {
+    const today = dayjs().startOf('week') // (Sunday-based; switch if you need Monday)
+    const recurrentEvents: EventoCalendarUser[] = []
+
+    for (const classItem of classes) {
       const weekToShow = classItem.duration || 1
+
       for (let week = 0; week < weekToShow; week++) {
         const baseWeek = today.add(week, 'week')
+
         for (const schedule of classItem.schedules) {
           const dayIndex = dayNameToIndex[schedule.day]
+          if (dayIndex == null) continue
+
           const date = baseWeek.startOf('week').add(dayIndex, 'day')
 
           const start = dayjs(
@@ -50,11 +57,11 @@ export const useViewClassCalendar = (data: ClassAPI[] | null) => {
             start,
             end,
             allDay: false,
-            backgroudColor: classItem.color,
+            backgroundColor: classItem.color, // <- typo fixed
             extendedProps: {
               classId: classItem.id,
-              teacherId: classItem.teacherUsers.map((teacher) => teacher.id),
-              studentId: classItem.studentUsers.map((student) => student.id),
+              teacherId: classItem.teacherUsers?.id || null,
+              studentId: classItem.studentUsers?.id || null,
               description: classItem.description
             }
           })

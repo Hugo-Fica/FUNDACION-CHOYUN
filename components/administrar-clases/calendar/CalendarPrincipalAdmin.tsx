@@ -3,39 +3,24 @@
 import { Card, CardContent } from '@/components/ui/card'
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop'
 import { Calendar, dayjsLocalizer, View, Views } from 'react-big-calendar'
-import { es } from 'date-fns/locale'
 import dayjs from 'dayjs'
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css'
 import 'react-big-calendar/lib/css/react-big-calendar.css'
 import { useEffect, useState } from 'react'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import { Loader2, Plus } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { AdminClassSidebar } from '../sidebar/admin/AdminClassSidebar'
 import { useScheduleClass } from '@/hooks/useScheduleClass'
 import { useQuery } from '@tanstack/react-query'
 import { useScheduleStore } from '@/store/useScheduleStore'
-import { useViewClassCalendar } from '@/hooks/useViewClassCalendar'
-import { ClassAPI } from '@/types/class'
+import { useViewClassCalendarAdmin } from '@/hooks/useViewClassCalendarAdmin'
 import { EventoCalendar } from '@/types/calendar'
 
-const locales = {
-  es: es
-}
 const DnDCalendar = withDragAndDrop(Calendar)
 const localizer = dayjsLocalizer(dayjs)
-export const CalendarPrincipal = () => {
+export const CalendarPrincipalAdmin = () => {
   const [date, setDate] = useState<Date>(new Date())
-  const [events, setEvents] = useState<Event[]>([])
   const [view, setView] = useState<View>(Views.MONTH)
-  const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false)
   const { getClass, getScheduleClass } = useScheduleClass()
   const { setSchedules, setClasses, classes } = useScheduleStore((state) => state)
 
@@ -54,7 +39,7 @@ export const CalendarPrincipal = () => {
     }
   }, [dataSchedules, isPendingSchedules, setSchedules])
 
-  const { events: e } = useViewClassCalendar(classes)
+  const { events: e } = useViewClassCalendarAdmin(classes)
 
   useEffect(() => {
     if (dataClass?.data) {
@@ -64,12 +49,10 @@ export const CalendarPrincipal = () => {
 
   return (
     <SidebarProvider className='md:min-h-[95%]'>
-      <SidebarInset className='p-10'>
-        {/* <div className="h-full flex flex-col p-4"> */}
-
+      <SidebarInset className='p-10 h-screen'>
         {isPendingClass ? (
           isPendingClass && (
-            <div className='flex justify-center items-center h-full'>
+            <div className='flex justify-center items-center h-screen'>
               <Loader2 className='animate-spin ' />
               Cargando...
             </div>
@@ -82,11 +65,9 @@ export const CalendarPrincipal = () => {
                 events={e}
                 eventPropGetter={(event) => ({
                   style: {
-                    backgroundColor: (event as EventoCalendar).backgroudColor
+                    backgroundColor: (event as EventoCalendar).backgroundColor
                   }
                 })}
-                // startAccessor='start'
-                // endAccessor='end'
                 style={{ height: '45rem' }}
                 views={['month', 'week', 'day', 'agenda']}
                 view={view}
@@ -95,12 +76,6 @@ export const CalendarPrincipal = () => {
                 onNavigate={setDate}
                 selectable
                 resizable
-                // onSelectSlot={handleSelectSlot}
-                // onSelectEvent={handleSelectEvent}
-                // onEventDrop={handleEventDrop}
-                // onEventResize={handleEventResize}
-                // eventPropGetter={eventPropGetter}
-                // components={components}
                 culture='es'
                 messages={{
                   today: 'Hoy',

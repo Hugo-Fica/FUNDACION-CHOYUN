@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/prisma/prisma'
-import dayjs from 'dayjs'
 
 export async function GET(request: NextRequest) {
   const user_id = request.nextUrl.pathname.split('/')[4]
